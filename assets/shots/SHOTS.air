@@ -1,0 +1,14 @@
+
+; SHOT1
+[Begin Action 1]
+0,0, 0,0, 4
+
+[Begin Action 2]
+0,0, 0,0, 1
+
+; SHOT4
+[Begin Action 3]
+1,0, 0,0, 10
+
+[Begin Action 1001]
+1001,0, 0,0, 10

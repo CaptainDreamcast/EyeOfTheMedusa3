@@ -1,0 +1,36 @@
+[Banter]
+
+[BanterStep]
+speaker = "Kat:"
+text = "You know they're not just dogs, right?"
+sprite = 1,0
+
+[BanterStep]
+speaker = "Toucan:"
+text = "..."
+sprite = 2,0
+
+[BanterStep]
+speaker = "Toucan:"
+text = "What else would they be?"
+sprite = 2,0
+
+[BanterStep]
+speaker = "Kat:"
+text = "Space dogs!"
+sprite = 1,0
+
+[BanterStep]
+speaker = "Toucan:"
+text = "..."
+sprite = 2,0
+
+[BanterStep]
+speaker = "Kat:"
+text = "..."
+sprite = 1,0
+
+[BanterStep]
+speaker = "Toucan:"
+text = "You just focus on the dodging."
+sprite = 2,0

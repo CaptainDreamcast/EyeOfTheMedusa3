@@ -1,0 +1,153 @@
+; PLAYER SHOTS
+
+; HOMING
+[Shot]
+id = 0
+
+[SubShot]
+type = homing
+anim = 3
+hitanim = 2
+offset = 0,10
+velocity = 4,0
+center = 0,0
+radius = 3
+
+[SubShot]
+type = homing
+anim = 3
+hitanim = 3
+offset = 0,-10
+velocity = 4,0
+center = 0,0
+radius = 3
+
+; LINEAR
+[Shot]
+id = 10
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 2
+offset = 0,10
+velocity = 4,0
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,-10
+velocity = 4,0
+center = 0,0
+radius = 3
+
+; BOMB SHOT
+[Shot]
+id = 20
+
+[SubShot]
+type = targetrandom
+anim = 3
+hitanim = 2
+center = 0,0
+radius = 3
+speed = 10
+offset = randfrom(-30,30), randfrom(-30,30)
+
+; ENEMY
+[Shot]
+id = 1
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 2
+offset = 0,10
+velocity = -4,0
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,-10
+velocity = -4,0
+center = 0,0
+radius = 3
+
+[Shot]
+id = 1001
+
+[SubShot]
+type = normal
+anim = 1001
+hitanim = 1001
+offset = 0,10
+angle = randfrom(0, 10)
+speed = 3
+center = 0,0
+radius = 3
+rotationadd = 0.1
+
+[SubShot]
+type = normal
+anim = 1001
+hitanim = 1001
+offset = 0,-10
+angle = randfrom(0.0, 10.0)
+speed = 3
+center = 0,0
+radius = 3
+rotationadd = 0.1
+
+[Shot]
+id = 1002
+
+[SubShot]
+type = normal
+anim = 1001
+hitanim = 1001
+offset = 0,0
+angle = 2*PI * ((BossTime % 180) / 180.0)  + randfrom(0, 0.1)
+speed = 3
+center = 0,0
+radius = 3
+rotationadd = 0.1
+
+[SubShot]
+type = normal
+anim = 1001
+hitanim = 1001
+offset = 0,0
+angle = 2*PI * ((BossTime % 180) / 180.0) + (PI / 2)  + randfrom(0, 0.1)
+speed = 3
+center = 0,0
+radius = 3
+rotationadd = 0.1
+
+
+[SubShot]
+type = normal
+anim = 1001
+hitanim = 1001
+offset = 0,0
+angle = 2*PI * ((BossTime % 180) / 180.0) + PI  + randfrom(0, 0.1)
+speed = 3
+center = 0,0
+radius = 3
+rotationadd = 0.1
+
+[SubShot]
+type = normal
+anim = 1001
+hitanim = 1001
+offset = 0,0
+angle = 2*PI * ((BossTime % 180) / 180.0) + ((PI * 3) / 2) + randfrom(0, 0.1)
+speed = 3
+center = 0,0
+radius = 3
+rotationadd = 0.1

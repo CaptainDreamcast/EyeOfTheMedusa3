@@ -1,0 +1,38 @@
+[Header]
+Sprites = "assets/stage/5.sff"
+Animations = "assets/stage/5.air"
+Boss = "assets/boss/Dummy.def"
+Banter = "assets/stage/banter5.def"
+BG = "assets/stage/bg5.def"
+
+[EnemyType]
+id = 3
+anim = 2
+deathanim = 3
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 700,240
+Velocity = -2,0 
+shotfrequency = 60
+shottype = 1
+
+[Enemy]
+Time = 100
+id = 3
+Position = 700,200
+Velocity = -2,0 
+shotfrequency = 60
+shottype = 1
+
+[Enemy]
+Time = 100
+id = 3
+Position = 700,280
+Velocity = -2,0 
+shotfrequency = 60
+shottype = 1
+
+[Boss]
+Time = 200

@@ -1,0 +1,33 @@
+[Header]
+
+name = "General Bark"
+life = 1000
+startpos = 550, 180
+anim = 1000
+
+[Pattern]
+lifestart = 1000
+
+; -------------- MOVEMENT
+
+;[Action]
+;time = 60
+;timerepeated = 120
+;type = goto
+;value = 550, 0
+;speed = 10 
+
+;[Action]
+;time = 120
+;timerepeated = 120
+;type = goto
+;value = 550, 350
+;speed = 10 
+
+; ----------------SHOTS
+
+[Action]
+time = 30
+timerepeated = 3
+type = shot
+shottype = 1002
