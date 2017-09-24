@@ -8,7 +8,19 @@ id = 0
 type = homing
 anim = 3
 hitanim = 2
-offset = 0,10
+offset = 0,0
+velocity = 4,0
+center = 0,0
+radius = 3
+
+[Shot]
+id = 1
+
+[SubShot]
+type = homing
+anim = 3
+hitanim = 2
+offset = 0,-10
 velocity = 4,0
 center = 0,0
 radius = 3
@@ -16,8 +28,8 @@ radius = 3
 [SubShot]
 type = homing
 anim = 3
-hitanim = 3
-offset = 0,-10
+hitanim = 2
+offset = 0,10
 velocity = 4,0
 center = 0,0
 radius = 3
@@ -29,8 +41,8 @@ id = 10
 [SubShot]
 type = normal
 anim = 3
-hitanim = 2
-offset = 0,10
+hitanim = 3
+offset = 0,-5
 velocity = 4,0
 center = 0,0
 radius = 3
@@ -39,7 +51,37 @@ radius = 3
 type = normal
 anim = 3
 hitanim = 3
+offset = 0,5
+velocity = 4,0
+center = 0,0
+radius = 3
+
+[Shot]
+id = 11
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
 offset = 0,-10
+velocity = 4,0
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 5,0
+velocity = 4,0
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,10
 velocity = 4,0
 center = 0,0
 radius = 3
@@ -58,15 +100,18 @@ speed = 10
 offset = randfrom(-30,30), randfrom(-30,30)
 
 ; ENEMY
-[Shot]
-id = 1
+
+; medium-fast shot towards player
+[Shot]   
+id = 100
 
 [SubShot]
 type = normal
 anim = 3
-hitanim = 2
+hitanim = 3
 offset = 0,10
-velocity = -4,0
+angle = angleTowardsPlayer
+speed = 6
 center = 0,0
 radius = 3
 
@@ -75,10 +120,51 @@ type = normal
 anim = 3
 hitanim = 3
 offset = 0,-10
-velocity = -4,0
+angle = angleTowardsPlayer
+speed = 6
 center = 0,0
 radius = 3
 
+; Slow shot towards player
+[Shot] 
+id = 101
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,10
+angle = angleTowardsPlayer
+speed = 1
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,-10
+angle = angleTowardsPlayer
+speed = 1
+center = 0,0
+radius = 3
+
+
+; -------------------------ANGELS
+[Shot]   
+id = 200
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer
+speed = 4
+center = 0,0
+radius = 3
+
+; -------------------------GENERAL BARK
 [Shot]
 id = 1001
 
@@ -151,3 +237,60 @@ speed = 3
 center = 0,0
 radius = 3
 rotationadd = 0.1
+
+[Shot]
+id = 1003
+
+[SubShot]
+type = normal
+anim = 5001
+hitanim = 5001
+absolute = randfrom(0, 640),-20
+velocity = 0,randfrom(1, 2)
+center = 0,0
+radius = 2
+rotationadd = randfrom(-0.1, -0.2)
+
+[Shot]
+id = 1004
+
+[SubShot]
+amount = 8
+type = normal
+anim = 1001
+hitanim = 1001
+offset = 0,0
+angle = 2*PI * (cursubshot / 8.0) + BossTime*10
+speed = 3
+center = 0,0
+radius = 3
+rotationadd = 0.1
+
+; -------------------------GOD
+[Shot]   
+id = 2001
+
+[SubShot]
+amount = 4
+type = normal
+anim = 2001
+hitanim = 2001
+offset = 0,0
+angle = angleTowardsPlayer - 0.15 + 0.1 * cursubshot
+speed = 8
+center = 0,0
+radius = 3
+
+[Shot]   
+id = 2002
+
+[SubShot]
+type = normal
+anim = 2001
+hitanim = 2001
+offset = 0,0
+angle = angleTowardsPlayer + randfrom(-0.05, 0.05)
+speed = 1
+center = 0,0
+radius = 3
+

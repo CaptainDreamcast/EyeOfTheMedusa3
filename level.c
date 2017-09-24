@@ -4,11 +4,15 @@
 #include <tari/animation.h>
 #include <tari/collisionhandler.h>
 #include <tari/mugenanimationreader.h>
+#include <tari/mugenassignmentevaluator.h>
+#include <tari/log.h>
+#include <tari/system.h>
 
 #include "enemyhandler.h"
 #include "banter.h"
 #include "boss.h"
 #include "bg.h"
+#include "player.h"
 
 typedef struct {
 	TextureData mTextures[10];
@@ -18,31 +22,22 @@ typedef struct {
 
 } ShotType;
 
-typedef struct {
-	int mActive;
-	int mType;
+typedef enum {
+	LEVEL_ACTION_TYPE_ENEMY,
+	LEVEL_ACTION_TYPE_BOSS,
+	LEVEL_ACTION_TYPE_BREAK,
+	LEVEL_ACTION_TYPE_RESET_LOCAL_COUNTERS,
 
+} LevelActionType;
+
+typedef struct {
+	int mHasBeenActivated;
 	int mStagePart;
 	Duration mTime;
 
-	Position mStart;
-	Velocity mVelocity;
-
-	Duration mShotFrequency;
-	int mShotType;
-} StageEnemy;
-
-typedef struct {
-	int mIsActive;
-	Duration mTime;
-	int mStagePart;
-} StageBoss;
-
-typedef struct {
-	int mIsActive;
-	Duration mTime;
-	int mStagePart;
-} StageBreak;
+	LevelActionType mType;
+	void* mData;
+} LevelAction;
 
 static struct {
 	int mCurrentLevel;
@@ -50,9 +45,7 @@ static struct {
 	MugenAnimations mAnimations;
 	MugenSpriteFile mSprites;
 
-	List mStageEnemies; // contains StageEnemy
-	List mStageBreaks;
-	StageBoss mBoss;
+	List mStageActions;
 
 	Duration mTime;
 
@@ -73,42 +66,83 @@ static int isStageEnemy(char* tName) {
 	return !strcmp("Enemy", tName);
 }
 
-static void loadStageEnemy(MugenDefScriptGroup* tGroup) {
-	StageEnemy* e = allocMemory(sizeof(StageEnemy));
-	e->mActive = 1;
-	e->mType = getMugenDefNumberVariableAsGroup(tGroup, "id");
-	e->mTime = getMugenDefNumberVariableAsGroup(tGroup, "time");
-	e->mStart = getMugenDefVectorVariableAsGroup(tGroup, "position");
-	e->mStart.z = 20;
-	e->mVelocity = getMugenDefVectorVariableAsGroup(tGroup, "velocity");
-	e->mShotFrequency = getMugenDefNumberVariableAsGroup(tGroup, "shotfrequency");
-	e->mShotType = getMugenDefNumberVariableAsGroup(tGroup, "shottype");
-	e->mStagePart = gData.mStagePart;
+static void loadStageEnemyMovementType(StageEnemy* e, MugenDefScriptGroup* tGroup) {
+	char* type = getAllocatedMugenDefStringVariableAsGroup(tGroup, "movementtype");
 
-	list_push_back_owned(&gData.mStageEnemies, e);
+	if (!strcmp("wait", type)) {
+		e->mMovementType = ENEMY_MOVEMENT_TYPE_WAIT;
+	} else if (!strcmp("rush", type)) {
+		e->mMovementType = ENEMY_MOVEMENT_TYPE_RUSH;
+	}
+	else {
+		logError("Unrecognized movement type");
+		logErrorString(type);
+		abortSystem();
+	}
+
+	freeMemory(type);
+}
+
+static void loadStageEnemy(MugenDefScriptGroup* tGroup, LevelAction* tLevelAction) {
+	StageEnemy* e = allocMemory(sizeof(StageEnemy));
+	e->mType = getMugenDefNumberVariableAsGroup(tGroup, "id");
+	
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("position", tGroup, &e->mStartPosition, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("waitposition", tGroup, &e->mWaitPosition, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("waitduration", tGroup, &e->mWaitDuration, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("finalposition", tGroup, &e->mFinalPosition, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("speed", tGroup, &e->mSpeed, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("shotfrequency", tGroup, &e->mShotFrequency, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("shottype", tGroup, &e->mShotType, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("health", tGroup, &e->mHealth, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("smallpower", tGroup, &e->mSmallPowerAmount, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("lifedrop", tGroup, &e->mLifeDropAmount, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("bombdrop", tGroup, &e->mBombDropAmount, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("amount", tGroup, &e->mAmount, "");
+
+	loadStageEnemyMovementType(e, tGroup);
+	
+	tLevelAction->mData = e;
 }
 
 static int isStageBoss(char* tName) {
 	return !strcmp("Boss", tName);
 }
 
-static void loadStageBoss(MugenDefScriptGroup* tGroup) {
-	gData.mBoss.mTime = getMugenDefIntegerOrDefaultAsGroup(tGroup, "time", 0);
-	gData.mBoss.mStagePart = gData.mStagePart;
+static void loadStageBoss(MugenDefScriptGroup* tGroup, LevelAction* tLevelAction) {
+	tLevelAction->mData = NULL;
 }
 
 static int isStageBreak(char* tName) {
 	return !strcmp("Break", tName);
 }
 
-static void loadStageBreak(MugenDefScriptGroup* tGroup) {
-	StageBreak* e = allocMemory(sizeof(StageBreak));
-	e->mIsActive = 0;
-	e->mStagePart = gData.mStagePart;
-	e->mTime = getMugenDefIntegerOrDefaultAsGroup(tGroup, "time", 0);
-
-	list_push_back_owned(&gData.mStageBreaks, e);
+static void loadStageBreak(MugenDefScriptGroup* tGroup, LevelAction* tLevelAction) {
+	tLevelAction->mData = NULL;
 	gData.mStagePart++;
+}
+
+static int isLocalCountReset(char* tName) {
+	return !strcmp("ResetLocalCounts", tName);
+}
+
+static void loadLocalCountReset(MugenDefScriptGroup* tGroup, LevelAction* tLevelAction) {
+	tLevelAction->mData = NULL;
+}
+
+static LevelAction* loadLevelActionFromGroup(MugenDefScriptGroup* tGroup) {
+	LevelAction* e = allocMemory(sizeof(LevelAction));
+	e->mTime = getMugenDefNumberVariableAsGroup(tGroup, "time");
+	e->mHasBeenActivated = 0;
+	e->mStagePart = gData.mStagePart;
+	return e;
+}
+
+static void loadSingleLevelAction(MugenDefScriptGroup* tGroup, LevelActionType tType, void(*tLoadFunc)(MugenDefScriptGroup*, LevelAction*)) {
+	LevelAction* e = loadLevelActionFromGroup(tGroup);
+	e->mType = tType;
+	tLoadFunc(tGroup, e);
+	list_push_back_owned(&gData.mStageActions, e);
 }
 
 static void loadStageEnemiesFromScript(MugenDefScript* tScript) {
@@ -116,16 +150,21 @@ static void loadStageEnemiesFromScript(MugenDefScript* tScript) {
 
 	MugenDefScriptGroup* current = tScript->mFirstGroup;
 	while (current != NULL) {
+		
 		if (isStageEnemy(current->mName)) {
-			loadStageEnemy(current);
+			loadSingleLevelAction(current, LEVEL_ACTION_TYPE_ENEMY, loadStageEnemy);
 		}
 		else if (isStageBreak(current->mName)) {
-			loadStageBreak(current);
+			loadSingleLevelAction(current, LEVEL_ACTION_TYPE_BREAK, loadStageBreak);
 		}
 		else if (isStageBoss(current->mName)) {
-			loadStageBoss(current);
+			loadSingleLevelAction(current, LEVEL_ACTION_TYPE_BOSS, loadStageBoss);
+		}
+		else if (isLocalCountReset(current->mName)) {
+			loadSingleLevelAction(current, LEVEL_ACTION_TYPE_RESET_LOCAL_COUNTERS, loadLocalCountReset);
 		}
 
+		
 		current = current->mNext;
 	}
 
@@ -135,8 +174,6 @@ static void loadBoss(MugenDefScript* tScript) {
 	char* defPath = getAllocatedMugenDefStringVariable(tScript, "Header", "boss");
 	loadBossFromDefinitionPath(defPath, &gData.mAnimations, &gData.mSprites);
 	freeMemory(defPath);
-
-	gData.mBoss.mIsActive = 0;
 }
 
 static void loadStage(MugenDefScript* tScript) {
@@ -147,8 +184,8 @@ static void loadStage(MugenDefScript* tScript) {
 
 static void loadLevelHandler(void* tData) {
 	(void)tData;
-	gData.mCurrentLevel = 1; // TODO
-	gData.mStageEnemies = new_list();
+	gData.mCurrentLevel = 2; // TODO
+	gData.mStageActions = new_list();
 
 	char path[1024];
 	sprintf(path, "assets/stage/%d.def", gData.mCurrentLevel);
@@ -170,29 +207,18 @@ static void updateTime() {
 	gData.mTime++;
 }
 
-static void updateSingleStageEnemy(void* tCaller, void* tData) {
-	(void)tCaller;
-	StageEnemy* e = tData;
-	
-	if (!e->mActive) return;
-	if (e->mStagePart != gData.mStagePart) return;
-	if (!isDurationOver(gData.mTime, e->mTime)) return;
-
-	e->mActive = 0;	
-	addEnemy(e->mType, e->mStart, e->mVelocity, e->mShotFrequency, e->mShotType);
+static void updateSingleStageEnemy(LevelAction* tLevelAction) {
+	StageEnemy* e = tLevelAction->mData;
+	tLevelAction->mHasBeenActivated = 1;	
+	addEnemy(e);
 }
 
-static void updateEnemies() {
-	list_map(&gData.mStageEnemies, updateSingleStageEnemy, NULL);
-}
 
-static void updateBoss() {
-	if (gData.mBoss.mIsActive) return;
-	if (gData.mBoss.mStagePart != gData.mStagePart) return;
-	if (!isDurationOver(gData.mTime, gData.mBoss.mTime)) return;
+static void updateBoss(LevelAction* tLevelAction) {
 
+	tLevelAction->mHasBeenActivated = 1;
 	activateBoss();
-	gData.mBoss.mIsActive = 1;
+
 }
 
 static void increaseStagePart() {
@@ -200,29 +226,52 @@ static void increaseStagePart() {
 	gData.mTime = 0;
 }
 
-static void updateSingleBreak(void* tCaller, void* tData) {
-	(void)tCaller;
-	StageBreak* e = tData;
-	if (e->mIsActive) return;
-	if (e->mStagePart != gData.mStagePart) return;
-	if (!isDurationOver(gData.mTime, e->mTime)) return;
+static void updateSingleBreak(LevelAction* tLevelAction) {
 	if (getEnemyAmount()) return;
 
-	e->mIsActive = 1;
+	tLevelAction->mHasBeenActivated = 1;
 	increaseStagePart();
-
 }
 
-static void updateBreaks() {
-	list_map(&gData.mStageBreaks, updateSingleBreak, NULL);
+static void updateLocalCounterReset(LevelAction* tLevelAction) {
+	tLevelAction->mHasBeenActivated = 1;
+	resetLocalPlayerCounts();
+}
+
+static void updateSingleAction(void* tCaller, void* tData) {
+	(void)tCaller;
+	LevelAction* e = tData;
+
+	if (e->mHasBeenActivated) return;
+	if (e->mStagePart != gData.mStagePart) return;
+	if (!isDurationOver(gData.mTime, e->mTime)) return;
+	
+	if (e->mType == LEVEL_ACTION_TYPE_ENEMY) {
+		updateSingleStageEnemy(e);
+	} else if (e->mType == LEVEL_ACTION_TYPE_BOSS) {
+		updateBoss(e);
+	}
+	else if (e->mType == LEVEL_ACTION_TYPE_BREAK) {
+		updateSingleBreak(e);
+	}
+	else if (e->mType == LEVEL_ACTION_TYPE_RESET_LOCAL_COUNTERS) {
+		updateLocalCounterReset(e);
+	}
+	else {
+		logError("Unrecognized action type.");
+		logErrorInteger(e->mType);
+		abortSystem();
+	}
+}
+
+static void updateActions() {
+	list_map(&gData.mStageActions, updateSingleAction, NULL);
 }
 
 static void updateLevelHandler(void* tData) {
 	(void)tData;
 	updateTime();
-	updateEnemies();
-	updateBoss();
-	updateBreaks();
+	updateActions();
 }
 
 ActorBlueprint LevelHandler = {

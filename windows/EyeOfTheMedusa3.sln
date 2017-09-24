@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EyeOfTheMedusa3", "EyeOfTheMedusa3.vcxproj", "{781B0A02-8FAB-40A0-9ECD-79570FB980A3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtari", "..\..\addons\libtari\windows\vs15\libtari.vcxproj", "{3572E463-893D-4815-8ECC-E65F3B8C6D90}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtari", "..\..\addons\libtari\windows\vs17\libtari.vcxproj", "{3572E463-893D-4815-8ECC-E65F3B8C6D90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,5 +34,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F90DA922-72AC-4D6C-990F-ADD59BD2F922}
 	EndGlobalSection
 EndGlobal

@@ -1,33 +1,100 @@
 [Header]
 
 name = "General Bark"
-life = 1000
+life = 400
 startpos = 550, 180
 anim = 1000
 
 [Pattern]
-lifestart = 1000
-
-; -------------- MOVEMENT
-
-;[Action]
-;time = 60
-;timerepeated = 120
-;type = goto
-;value = 550, 0
-;speed = 10 
-
-;[Action]
-;time = 120
-;timerepeated = 120
-;type = goto
-;value = 550, 350
-;speed = 10 
+lifestart = 400
 
 ; ----------------SHOTS
-
 [Action]
 time = 30
 timerepeated = 3
 type = shot
 shottype = 1002
+
+[Pattern]
+lifestart = 300
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 60
+
+; ----------------SHOTS
+[Action]
+time = 30
+timerepeated = 3
+type = shot
+shottype = 1002
+
+; -------------- MOVEMENT
+
+[Action]
+time = 60
+timerepeated = 60
+type = goto
+value = 550, 50
+speed = 10 
+
+[Action]
+time = 90
+timerepeated = 60
+type = goto
+value = 550, 300
+speed = 10 
+
+; -------------- SPIN
+
+[Action]
+time = 60
+timerepeated = 1
+type = addrotation
+value = 0.4
+
+
+[Pattern]
+lifestart = 200
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 60
+
+; ----------------RESET
+[Action]
+time = 0
+type = goto
+value = 550, 180
+speed = 10 
+
+[Action]
+time = 0
+type = setrotation
+value = 0
+
+; ----------------SHOTS
+[Action]
+time = 30
+timerepeated = 3
+type = shot
+shottype = 1003
+
+[Action]
+time = 60
+timerepeated = 60
+type = shot
+shottype = 1004
+
+; -------------- MOVEMENT
+
+[Action]
+time = 60
+timerepeated = 60
+type = goto
+value = randfrom(0, 640), randfrom(0, 350)
+speed = 3 

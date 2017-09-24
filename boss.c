@@ -10,13 +10,19 @@
 #include <tari/system.h>
 #include <tari/math.h>
 #include <tari/mugenassignmentevaluator.h>
+#include <tari/animation.h>
+#include <tari/texthandler.h>
 
 #include "collision.h"
 #include "shothandler.h"
+#include "itemhandler.h"
 
 typedef enum {
 	BOSS_ACTION_TYPE_GOTO,
 	BOSS_ACTION_TYPE_SHOT,
+	BOSS_ACTION_TYPE_DROP_SMALL_POWER,
+	BOSS_ACTION_TYPE_ADD_ROTATION,
+	BOSS_ACTION_TYPE_SET_ROTATION,
 } BossActionType;
 
 
@@ -49,6 +55,10 @@ typedef struct {
 	Vector mActions;
 } BossPattern;
 
+typedef struct {
+	MugenAssignment* mValue;
+} SingleValueAction;
+
 static struct {
 	int mIsActive;
 	int mIsLoaded;
@@ -71,12 +81,21 @@ static struct {
 	Duration mTime;
 	Vector3D mTarget;
 
+	Position mHealthBarPosition;
+	int mHealthBarTextID;
+	TextureData mHealthBarTexture;
+	int mHealthBarAnimationID;
+
+	double mSpeed;
+	double mRotation;
 } gData;
 
 static void loadBossHandler(void* tData) {
 	(void)tData;
 	gData.mIsActive = 0;
 	gData.mIsLoaded = 0;
+
+	gData.mHealthBarTexture = loadTexture("$/rd/effects/white.pkg");
 }
 
 static int isHeader(MugenDefScriptGroup* tGroup) {
@@ -120,6 +139,12 @@ static void loadShotAction(BossAction* tAction, MugenDefScriptGroup* tGroup) {
 	tAction->mData = e;
 }
 
+static void loadSingleValueAction(BossAction* tAction, MugenDefScriptGroup* tGroup) {
+	SingleValueAction* e = allocMemory(sizeof(SingleValueAction));
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("value", tGroup, &e->mValue, "");
+	tAction->mData = e;
+}
+
 static void loadActionType(BossAction* e, MugenDefScriptGroup* tGroup) {
 	char* typeString = getAllocatedMugenDefStringVariableAsGroup(tGroup, "type");
 	if (!strcmp("goto", typeString)) {
@@ -129,6 +154,18 @@ static void loadActionType(BossAction* e, MugenDefScriptGroup* tGroup) {
 	else if (!strcmp("shot", typeString)) {
 		e->mType = BOSS_ACTION_TYPE_SHOT;
 		loadShotAction(e, tGroup);
+	}
+	else if (!strcmp("smallpowerdrop", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_DROP_SMALL_POWER;
+		loadSingleValueAction(e, tGroup);
+	}
+	else if (!strcmp("setrotation", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_SET_ROTATION;
+		loadSingleValueAction(e, tGroup);
+	}
+	else if (!strcmp("addrotation", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_ADD_ROTATION;
+		loadSingleValueAction(e, tGroup);
 	}
 	else {
 		logError("Unrecognized action type");
@@ -174,11 +211,22 @@ void loadBossFromDefinitionPath(char * tDefinitionPath, MugenAnimations* tAnimat
 	gData.mIsLoaded = 1;
 }
 
+static void updateHealthBarSize() {
+	double start = gData.mHealthBarPosition.x;
+	double end = 620;
+
+	double totalLength = end - start;
+	double t = gData.mLife / (double)gData.mLifeMax;
+	double length = totalLength*t;
+	setAnimationSize(gData.mHealthBarAnimationID, makePosition(length, 10, 1), makePosition(0, 0, 0));
+}
+
 static void bossHitCB(void* tCaller, void* tCollisionData) {
 	(void)tCaller;
 	(void)tCollisionData;
 
-	printf("Boss ded\n");
+	gData.mLife--;
+	updateHealthBarSize();
 }
 
 void activateBoss() {
@@ -192,6 +240,18 @@ void activateBoss() {
 	gData.mCurrentPattern = 0;
 	gData.mLife = gData.mLifeMax;
 	gData.mTarget = *getHandledPhysicsPositionReference(gData.mPhysicsID);
+	gData.mSpeed = 0;
+	gData.mRotation = 0;
+
+	char bossText[100];
+	sprintf(bossText, "%s", gData.mName);
+	gData.mHealthBarTextID = addHandledText(makePosition(21, 21, 80), bossText, 0, COLOR_BLACK, makePosition(15, 15, 0), makePosition(-2, -2, 1), makePosition(INF, INF, INF), INF);
+	gData.mHealthBarTextID = addHandledText(makePosition(20, 20, 81), bossText, 0, COLOR_WHITE, makePosition(15, 15, 0), makePosition(-2, -2, 1), makePosition(INF, INF, INF), INF);
+	gData.mHealthBarPosition = makePosition(strlen(bossText)*(15-2)+32, 22, 80);
+	gData.mHealthBarAnimationID = playOneFrameAnimationLoop(gData.mHealthBarPosition, &gData.mHealthBarTexture);
+	setAnimationColorType(gData.mHealthBarAnimationID, COLOR_DARK_RED);
+	updateHealthBarSize();
+
 	gData.mIsActive = 1;
 }
 
@@ -213,16 +273,27 @@ Position getBossPosition()
 	return p;
 }
 
+static void updateGoingToNextPattern() {
+	if (gData.mCurrentPattern >= vector_size(&gData.mPatterns) - 1) return;
+
+	BossPattern* nextPattern = vector_get(&gData.mPatterns, gData.mCurrentPattern + 1);
+	if (gData.mLife <= nextPattern->mLifeStart) {
+		gData.mLife = nextPattern->mLifeStart;
+		gData.mTime = 0;
+		gData.mCurrentPattern++;
+	}
+}
+
 static void setBossTarget(Vector3D tTarget) {
 	gData.mTarget = tTarget;
 }
 
 static void performGoto(BossAction* tAction) {
 	GotoAction* e = tAction->mData;
-	double speed = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(e->mSpeed, NULL, 2);
+	gData.mSpeed = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(e->mSpeed, NULL, 2);
 	Vector3D target = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(e->mTarget, NULL, makePosition(0, 0, 0));
 
-	setHandledPhysicsMaxVelocity(gData.mPhysicsID, speed);
+	setHandledPhysicsMaxVelocity(gData.mPhysicsID, gData.mSpeed);
 	setBossTarget(target);
 }
 
@@ -232,6 +303,30 @@ static void performShot(BossAction* tAction) {
 	addShot(e->mShotID, getEnemyShotCollisionList(), p);
 }
 
+static void performSmallPowerDrop(BossAction* tAction) {
+	SingleValueAction* e = tAction->mData;
+
+	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
+	int amount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mValue, NULL, 0);
+	addSmallPowerItems(p, amount);
+}
+
+static void performSettingRotation(BossAction* tAction) {
+	SingleValueAction* e = tAction->mData;
+
+	double value = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(e->mValue, NULL, 0);
+	gData.mRotation = value;
+	setMugenAnimationDrawAngle(gData.mAnimationID, gData.mRotation);
+}
+
+static void performAddingRotation(BossAction* tAction) {
+	SingleValueAction* e = tAction->mData;
+
+	double value = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(e->mValue, NULL, 0);
+	gData.mRotation += value;
+	setMugenAnimationDrawAngle(gData.mAnimationID, gData.mRotation);
+}
+
 static void performAction(BossAction* e) {
 	if (e->mType == BOSS_ACTION_TYPE_GOTO) {
 		performGoto(e);
@@ -239,12 +334,21 @@ static void performAction(BossAction* e) {
 	else if (e->mType == BOSS_ACTION_TYPE_SHOT) {
 		performShot(e);
 	}
+	else if (e->mType == BOSS_ACTION_TYPE_DROP_SMALL_POWER) {
+		performSmallPowerDrop(e);
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_SET_ROTATION) {
+		performSettingRotation(e);
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_ADD_ROTATION) {
+		performAddingRotation(e);
+	}
 	else {
 		logError("Unrecognized boss action type");
 		logErrorInteger(e->mType);
 		abortSystem();
 	}
-
+	
 }
 
 static void updateSingleAction(void* tCaller, void* tData) {
@@ -266,7 +370,7 @@ static void updateSingleAction(void* tCaller, void* tData) {
 	if (isHealthTrigger) {
 		e->mHealth = makeNumberMugenAssignment(-1);
 	}
-
+	
 	if (isTimeTrigger || isHealthTrigger) {
 		performAction(e);
 	}
@@ -280,14 +384,9 @@ static void updateActions() {
 static void updateMovement() {
 	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
 	Vector3D delta = vecSub(gData.mTarget, p);
-	double len = vecLength(delta);
-	if (vecLength(delta) < 2) {
-		stopHandledPhysics(gData.mPhysicsID);
-		return;
-	}
-	Vector3D accel = (len < 1) ? delta : vecNormalize(delta);
-	addAccelerationToHandledPhysics(gData.mPhysicsID, accel);
-
+	Velocity* vel = getHandledPhysicsVelocityReference(gData.mPhysicsID);
+	double speed = min(vecLength(delta), gData.mSpeed);
+	*vel = vecScale(vecNormalize(delta), speed);
 }
 
 static void updateTime() {
@@ -297,6 +396,7 @@ static void updateTime() {
 static void updateBoss(void* tData) {
 	(void)tData;
 	if (!gData.mIsActive) return;
+	updateGoingToNextPattern();
 	updateActions();
 	updateMovement();
 	updateTime();

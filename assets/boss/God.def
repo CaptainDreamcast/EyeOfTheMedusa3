@@ -1,0 +1,23 @@
+[Header]
+
+name = "God"
+life = 1000
+startpos = 550, 180
+anim = 2000
+
+[Pattern]
+lifestart = 1000
+
+; ----------------SHOTS
+
+[Action]
+time = 30
+timerepeated = 4
+type = shot
+shottype = 2001
+
+[Action]
+time = 30
+timerepeated = 20
+type = shot
+shottype = 2002

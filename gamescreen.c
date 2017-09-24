@@ -16,6 +16,7 @@
 #include "collision.h"
 #include "boss.h"
 #include "assignment.h"
+#include "itemhandler.h"
 
 static struct {
 	char mDefinitionPath[1024];
@@ -26,6 +27,7 @@ static void loadGameScreen() {
 
 	loadGameAssignments();
 	loadCollisions();
+	instantiateActor(ItemHandler);
 	instantiateActor(EnemyHandler);
 	instantiateActor(BackgroundHandler);
 	instantiateActor(Player);

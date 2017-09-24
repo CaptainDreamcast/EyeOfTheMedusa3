@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,32 +21,33 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{781B0A02-8FAB-40A0-9ECD-79570FB980A3}</ProjectGuid>
     <RootNamespace>EyeOfTheMedusa3</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -69,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Legion\Desktop\DEV\MICROSOFT\WINDOWS\LIBTARIPORT\addons\libtari\include;C:\Users\Legion\Documents\Visual Studio 2015\SDL2-2.0.5\include;C:\Users\Legion\Documents\Visual Studio 2015\SDL2_image-2.0.1\include;C:\Users\Legion\Documents\Visual Studio 2015\SDL2_mixer-2.0.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Legion\Documents\Visual Studio 2015\SDL2-2.0.5\lib\x86;C:\Users\Legion\Documents\Visual Studio 2015\SDL2_image-2.0.1\lib\x86;C:\Users\Legion\Documents\Visual Studio 2015\SDL2_mixer-2.0.1\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Legion\Desktop\DEV\MICROSOFT\WINDOWS\SDL2\SDL2-2.0.5\include;C:\Users\Legion\Desktop\DEV\MICROSOFT\WINDOWS\SDL2\SDL2_image-2.0.1;C:\Users\Legion\Desktop\DEV\MICROSOFT\WINDOWS\SDL2\SDL2_mixer-2.0.1;C:\Users\Legion\Desktop\DEV\MICROSOFT\WINDOWS\LIBTARIPORT\addons\libtari\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Legion\Desktop\DEV\MICROSOFT\WINDOWS\LIBTARIPORT\addons\libtari\windows\vs17\LIB;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -88,20 +89,26 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <CompileAs>Default</CompileAs>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
-      <EntryPointSymbol>wmain</EntryPointSymbol>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;winmm.lib;version.lib;imm32.lib;libjpeg.lib;libpng16.lib;zlib.lib;libwebp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <SubSystem>
+      </SubSystem>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>post_build.bat</Command>
@@ -128,16 +135,12 @@
     <ClCompile Include="..\collision.c" />
     <ClCompile Include="..\enemyhandler.c" />
     <ClCompile Include="..\gamescreen.c" />
+    <ClCompile Include="..\itemhandler.c" />
     <ClCompile Include="..\level.c" />
     <ClCompile Include="..\main.c" />
     <ClCompile Include="..\player.c" />
     <ClCompile Include="..\shothandler.c" />
     <ClCompile Include="..\ui.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\addons\libtari\windows\vs15\libtari.vcxproj">
-      <Project>{3572e463-893d-4815-8ecc-e65f3b8c6d90}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\assignment.h" />
@@ -147,6 +150,7 @@
     <ClInclude Include="..\collision.h" />
     <ClInclude Include="..\enemyhandler.h" />
     <ClInclude Include="..\gamescreen.h" />
+    <ClInclude Include="..\itemhandler.h" />
     <ClInclude Include="..\level.h" />
     <ClInclude Include="..\player.h" />
     <ClInclude Include="..\shothandler.h" />
@@ -158,6 +162,11 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\boot\EyeOfTheMedusa3.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\addons\libtari\windows\vs17\libtari.vcxproj">
+      <Project>{3572e463-893d-4815-8ecc-e65f3b8c6d90}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

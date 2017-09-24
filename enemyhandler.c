@@ -9,9 +9,11 @@
 #include <tari/physicshandler.h>
 #include <tari/mugenanimationhandler.h>
 #include <tari/math.h>
+#include <tari/mugenassignmentevaluator.h>
 
 #include "shothandler.h"
 #include "collision.h"
+#include "itemhandler.h"
 
 typedef struct {
 	int mIdleAnimation;
@@ -19,6 +21,12 @@ typedef struct {
 
 	int mID;
 } EnemyType;
+
+typedef enum {
+	ENEMY_MOVEMENT_STATE_GOTO_WAIT,
+	ENEMY_MOVEMENT_STATE_WAIT,
+	ENEMY_MOVEMENT_STATE_GOTO_FINAL
+} EnemyMovementState;
 
 typedef struct {
 	int mType;
@@ -33,7 +41,21 @@ typedef struct {
 
 	CollisionData mCollisionData;
 
+	Position mStartPosition;
+	Position mWaitPosition;
+	Position mFinalPosition;
+	EnemyMovementType mMovementType;
+	EnemyMovementState mMovementState;
+
+	Duration mWaitNow;
+	Duration mWaitDuration;
+	double mSpeed;
+
+	int mHealth;
+
 	int mIsAlive;
+
+	StageEnemy* mEnemyBase;
 } ActiveEnemy;
 
 static struct {
@@ -97,30 +119,71 @@ static void enemyHitCB(void* tCaller, void* tCollisionData) {
 	CollisionData* collisionData = tCollisionData;
 
 	if (collisionData->mCollisionList == getPlayerCollisionList()) return;
-
+	
+	e->mHealth--;
+	if (e->mHealth) return;
 	// TODO
+
+	Position pos = *getHandledPhysicsPositionReference(e->mPhysicsID);
+	int powerAmount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mEnemyBase->mSmallPowerAmount, NULL, 0);
+	addSmallPowerItems(pos, powerAmount);
+
 	removeActiveEnemy(e);
 	list_remove(&gData.mActiveEnemies, e->mListID);
 }
 
-void addEnemy(int tType, Position mPosition, Velocity mVelocity, Duration mShotFrequency, int mShotType)
-{
+typedef struct {
+	int i;
+
+} EnemyAssignmentCaller;
+
+void getCurrentEnemyIndex(char* tDst, void* tCaller) {
+	EnemyAssignmentCaller* caller = tCaller;
+
+	sprintf(tDst, "%d", caller->i);
+}
+
+static void addSingleEnemy(StageEnemy* tEnemy, int i) {
+	EnemyAssignmentCaller caller;
+	caller.i = i;
+
 	ActiveEnemy* e = allocMemory(sizeof(ActiveEnemy));
-	e->mType = tType;
-	e->mShotType = mShotType;
+	e->mEnemyBase = tEnemy;
+	e->mType = tEnemy->mType;
+	e->mShotType = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(tEnemy->mShotType, &caller, 0);
 	e->mShotNow = 0;
-	e->mShotFrequency = mShotFrequency;
+	e->mShotFrequency = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(tEnemy->mShotFrequency, &caller, 60);
 	e->mIsAlive = 1;
 
-	e->mPhysicsID = addToPhysicsHandler(mPosition);
-	addAccelerationToHandledPhysics(e->mPhysicsID, mVelocity);
+	e->mStartPosition = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(tEnemy->mStartPosition, &caller, makePosition(0, 0, 0));
+	e->mPhysicsID = addToPhysicsHandler(e->mStartPosition);
+	e->mSpeed = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(tEnemy->mSpeed, &caller, 1);
 
-	e->mAnimationID = addMugenAnimation(getMugenAnimation(gData.mEnemyAnimations, getEnemyTypeIdleAnimation(e->mType)), gData.mEnemySprites, makePosition(0,0,0));
+	e->mFinalPosition = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(tEnemy->mFinalPosition, &caller, makePosition(0, 0, 0));
+	e->mWaitPosition = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(tEnemy->mWaitPosition, &caller, e->mFinalPosition);
+	e->mMovementType = tEnemy->mMovementType;
+	e->mMovementState = e->mMovementType == ENEMY_MOVEMENT_TYPE_WAIT ? ENEMY_MOVEMENT_STATE_GOTO_WAIT : ENEMY_MOVEMENT_STATE_GOTO_FINAL;
+
+	e->mWaitDuration = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(tEnemy->mWaitDuration, &caller, 120);
+
+	e->mAnimationID = addMugenAnimation(getMugenAnimation(gData.mEnemyAnimations, getEnemyTypeIdleAnimation(e->mType)), gData.mEnemySprites, makePosition(0, 0, 0));
 	setMugenAnimationBasePosition(e->mAnimationID, getHandledPhysicsPositionReference(e->mPhysicsID));
 	e->mCollisionData.mCollisionList = getEnemyCollisionList();
 	setMugenAnimationCollisionActive(e->mAnimationID, getEnemyCollisionList(), enemyHitCB, e, &e->mCollisionData);
 
+	e->mHealth = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(tEnemy->mHealth, &caller, 10);
+
 	e->mListID = list_push_back_owned(&gData.mActiveEnemies, e);
+
+}
+
+void addEnemy(StageEnemy* tEnemy)
+{
+	int amount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(tEnemy->mAmount, NULL, 1);
+	int i;
+	for (i = 0; i < amount; i++) {
+		addSingleEnemy(tEnemy, i);
+	}
 }
 
 int getEnemyAmount()
@@ -176,9 +239,62 @@ static void updateEnemyShot(ActiveEnemy* e) {
 	}
 }
 
+static void updateEnemyWait(ActiveEnemy* e) {
+	if (e->mMovementState != ENEMY_MOVEMENT_STATE_WAIT) return;
+
+	if (handleDurationAndCheckIfOver(&e->mWaitNow, e->mWaitDuration)) {
+		e->mMovementState = ENEMY_MOVEMENT_STATE_GOTO_FINAL;
+	}
+}
+
+static void startWait(ActiveEnemy* e) {
+	stopHandledPhysics(e->mPhysicsID);
+	e->mMovementState = ENEMY_MOVEMENT_STATE_WAIT;
+	e->mWaitNow = 0;
+	e->mStartPosition = e->mWaitPosition;
+}
+
+static void updateEnemyMovement(ActiveEnemy* e) {
+	if (e->mMovementState == ENEMY_MOVEMENT_STATE_WAIT) return;
+
+	Position target;
+	if (e->mMovementState == ENEMY_MOVEMENT_STATE_GOTO_WAIT) {
+		target = e->mWaitPosition;
+	}
+	else {
+		target = e->mFinalPosition;
+	}
+
+	Position start = e->mStartPosition;
+	Position* pos = getHandledPhysicsPositionReference(e->mPhysicsID);
+	
+	double totalLength = vecLength(vecSub(target, start));
+	double posLength = vecLength(vecSub(*pos, start));
+	double t = posLength / totalLength;
+
+	double stepSize = 1 / (totalLength / e->mSpeed);
+	
+	t = min(1, t+stepSize);
+
+	*pos = interpolatePositionLinear(start, target, t);
+	if (t >= 1)	{
+		if (e->mMovementState == ENEMY_MOVEMENT_STATE_GOTO_WAIT) {
+			startWait(e);
+			return;
+		}
+		else {
+			pos->x = -1000;
+		}
+	}
+
+}
+
 static int updateSingleActiveEnemy(void* tCaller, void* tData) {
 	(void)tCaller;
 	ActiveEnemy* e = tData;
+	
+	updateEnemyWait(e);
+	updateEnemyMovement(e);
 
 	Position p = *getHandledPhysicsPositionReference(e->mPhysicsID);
 	if (p.x < -100) {

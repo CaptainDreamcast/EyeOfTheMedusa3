@@ -1,0 +1,46 @@
+[Header]
+Sprites = "assets/stage/2.sff"
+Animations = "assets/stage/2.air"
+Boss = "assets/boss/God.def"
+Banter = "assets/stage/banter2.def"
+BG = "assets/stage/bg2.def"
+
+[EnemyType]
+id = 3
+anim = 2
+deathanim = 3
+
+[Enemy]
+amount = 2;0
+Time = 100
+id = 3 
+Position = 700+curenemy*100,50
+FinalPosition = -100,50
+MovementType = rush
+Speed = 3
+shotfrequency = randfrom(40, 60)
+shottype = 200
+health = 1
+smallpower = 5
+
+[Enemy]
+amount = 2;0
+Time = 100
+id = 3 
+Position = 700+curenemy*100,300
+FinalPosition = -100,300
+MovementType = rush
+Speed = 3
+shotfrequency = randfrom(40, 60)
+shottype = 200
+health = 1
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Boss]
+Time = 200
+
+[Break] ; TODO: remove
+Time = 100000

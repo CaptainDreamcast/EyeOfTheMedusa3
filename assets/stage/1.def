@@ -11,31 +11,125 @@ anim = 2
 deathanim = 3
 
 [Enemy]
+amount = 6
 Time = 100
 id = 3 
-Position = 700,240
-Velocity = -2,0 
-shotfrequency = 60
-shottype = 1
+Position = 700,50+50*curenemy
+FinalPosition = -100,50+50*curenemy
+MovementType = rush
+Speed = 5
+shotfrequency = INF
+shottype = 100
+health = 1
+smallpower = 5
 
 [Enemy]
+amount = 6
 Time = 100
-id = 3
-Position = 700,200
-Velocity = -2,0 
-shotfrequency = 60
-shottype = 1
+id = 3 
+Position = 800,50+50*curenemy
+FinalPosition = -100,50+50*curenemy
+MovementType = rush
+Speed = 5
+shotfrequency = INF
+shottype = 100
+health = 1
+smallpower = 5
 
 [Enemy]
+amount = 6
 Time = 100
-id = 3
-Position = 700,280
-Velocity = -2,0 
+id = 3 
+Position = 900,50+50*curenemy
+FinalPosition = -100,50+50*curenemy
+MovementType = rush
+Speed = 5
+shotfrequency = INF
+shottype = 100
+health = 1
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Enemy]
+amount = 5
+Time = 100
+id = 3 
+Position = 700,randfrom(0, 327)
+WaitPosition = 500,randfrom(0, 327)
+FinalPosition = -100, randfrom(0, 327)
+waitduration = 200
+MovementType = wait
+Speed = 2
 shotfrequency = 60
-shottype = 1
+shottype = 100
+health = 4
+smallpower = 5
 
 [Break]
 time = 100
 
+[Enemy]
+amount = 2
+Time = 100
+id = 3 
+Position = 700,200+curenemy*100
+WaitPosition = 500,200+curenemy*100
+FinalPosition = -100,200+curenemy*100
+waitduration = 200
+MovementType = wait
+Speed = 2 
+shotfrequency = 6
+shottype = 100
+health = 4
+smallpower = 5
+
+[Break]
+time = 100
+
+[Enemy]
+amount = 6
+Time = 100
+id = 3 
+Position = 700,50+curenemy*50
+WaitPosition = 500,50+curenemy*50
+FinalPosition = 700,50+curenemy*50
+waitduration = 200
+MovementType = wait
+Speed = 3 
+shotfrequency = randfrom(25,35)
+shottype = 100
+health = 2
+smallpower = 5
+
+[Break]
+Time = 100
+
+[ResetLocalCounts]
+Time = 0
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 700,50+curenemy*50
+WaitPosition = 500,50+curenemy*50
+FinalPosition = 700,50+curenemy*50
+waitduration = 1000
+MovementType = wait
+Speed = 3 
+shotfrequency = randfrom(25,35)
+shottype = 100
+health = 100
+lifedrop = ifelse(localdeathcount=0, 1, 0)
+bombdrop = ifelse(localdeathcount!=0 && localbombcount=0, 1, 0)
+smallpower = ifelse(localdeathcount!=0 && localbombcount != 0, 50, 0)
+
+[Break]
+Time = 100
+
 [Boss]
 Time = 200
+
+[Break] ; TODO: remove
+Time = 100000

@@ -1,0 +1,28 @@
+[Header]
+size = 2824
+speed = 6
+bgopacity = 0.5
+
+[BG Element]
+offset = 0,0
+sprite = 9000,0
+
+[BG Element]
+offset = 640,0
+sprite = 9000,1
+
+[BG Element]
+offset = 1280,0
+sprite = 9000,2
+
+[BG Element]
+offset = 1920,0
+sprite = 9000,3
+
+[BG Element]
+offset = 2560,0
+sprite = 9000,4
+
+[BG Element]
+offset = 2824,0
+sprite = 9000,0

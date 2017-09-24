@@ -1,0 +1,15 @@
+
+; SHOT1
+[Begin Action 1]
+0,0, 0,0, -1
+
+; ANGEL_IDLE
+[Begin Action 2]
+Clsn2: 1
+  Clsn2[0] = -13, -24, 13, 46
+2,0, 0,0, 10
+
+[Begin Action 2000]
+Clsn2: 1
+  Clsn2[0] = -26, -56, 27, 110
+2000,0, 0,0, 10

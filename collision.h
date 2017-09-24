@@ -10,3 +10,5 @@ int getPlayerCollisionList();
 int getPlayerShotCollisionList();
 int getEnemyCollisionList();
 int getEnemyShotCollisionList();
+int getPowerItemCollisionList();
+int getPlayerItemCollisionList();

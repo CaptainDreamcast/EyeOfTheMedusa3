@@ -16,6 +16,7 @@
 #include "collision.h"
 #include "enemyhandler.h"
 #include "boss.h"
+#include "player.h"
 
 typedef enum {
 	SHOT_TYPE_NORMAL,
@@ -24,9 +25,14 @@ typedef enum {
 } ShotHomingType;
 
 typedef struct {
+	MugenAssignment* mAmount;
+	
 	ShotHomingType mHomingType;
 	
 	MugenAssignment* mOffset;
+
+	int mHasAbsolutePosition;
+	MugenAssignment* mAbsolutePosition;
 
 	int mHasVelocity;
 	MugenAssignment* mVelocity;
@@ -127,9 +133,11 @@ static void handleNewSubShotType(MugenDefScriptGroup* tGroup) {
 	assert(gActiveShotType);
 
 	SubShotType* e = allocMemory(sizeof(SubShotType));
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("amount", tGroup, &e->mAmount, "");
 	e->mIdleAnimation = getMugenDefNumberVariableAsGroup(tGroup, "anim");
 	e->mHitAnimation = getMugenDefNumberVariableAsGroup(tGroup, "hitanim");
 	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("offset", tGroup, &e->mOffset, "");
+	e->mHasAbsolutePosition = fetchMugenAssignmentFromGroupAndReturnWhetherItExists("absolute", tGroup, &e->mAbsolutePosition);
 	e->mHasVelocity = fetchMugenAssignmentFromGroupAndReturnWhetherItExists("velocity", tGroup, &e->mVelocity);
 	e->mHasAngle = fetchMugenAssignmentFromGroupAndReturnWhetherItExists("angle", tGroup, &e->mAngle);
 	e->mHasSpeed = fetchMugenAssignmentFromGroupAndReturnWhetherItExists("speed", tGroup, &e->mSpeed);
@@ -192,9 +200,14 @@ static void updateHoming(ActiveSubShot* e) {
 	Position p = *getHandledPhysicsPositionReference(e->mPhysicsID);
 	Position closestEnemy = getClosestEnemyPositionIncludingBoss(p);
 
-	Vector3D dir = vecScale(vecNormalize(vecSub(closestEnemy, p)), 0.5);
+	Velocity* vel = getHandledPhysicsVelocityReference(e->mPhysicsID);
+	Vector3D dir = vecScale(vecNormalize(vecSub(closestEnemy, p)), vecLength(*vel));
 	dir.z = 0;
-	addAccelerationToHandledPhysics(e->mPhysicsID, dir);
+	if (vecLength(dir) < 1e-6) return;
+
+	double angle = getAngleFromDirection(dir);
+	setMugenAnimationDrawAngle(e->mAnimationID, angle);
+	*vel = dir;
 }
 
 static void updateRotation(ActiveSubShot* e) {
@@ -281,26 +294,62 @@ static void swap(double* a, double* b) {
 	*b = c;
 }
 
-static void addSingleSubShot(void* tCaller, void* tData) {
-	SubShotCaller* caller = tCaller;
-	SubShotType* subShot = tData;
+typedef struct {
+	ActiveSubShot* mActiveShot;
+	SubShotCaller* mActiveCaller;
+	Position* mOffsetReference; // TODO: better
+	int i;
+} SubShotAssignmentParseCaller;
 
+void getCurrentSubShotIndex(char* tOutput, void* tCaller) {
+	SubShotAssignmentParseCaller* caller = tCaller;
+
+	sprintf(tOutput, "%d", caller->i);
+}
+
+void getShotAngleTowardsPlayer(char* tOutput, void* tCaller) {
+	SubShotAssignmentParseCaller* caller = tCaller;
+
+	Position pos = vecAdd(caller->mActiveCaller->mPosition, *caller->mOffsetReference);
+	Position playerPos = getPlayerPosition();
+
+	Vector3D direction = vecNormalize(vecSub(playerPos, pos));
+	direction.x *= -1; // TODO
+	double angle = getAngleFromDirection(direction);
+
+	sprintf(tOutput, "%f", angle);
+}
+
+static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i) {
 	ActiveSubShot* e = allocMemory(sizeof(ActiveSubShot));
 	e->mType = subShot;
 	e->mRoot = caller->mRoot;
 
-	Vector3D offset = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(subShot->mOffset, NULL, makePosition(0, 0, 0));
+	SubShotAssignmentParseCaller assignmentCaller;
+	assignmentCaller.mActiveCaller = caller;
+	assignmentCaller.mActiveShot = e;
+	assignmentCaller.i = i;
+
+	Vector3D offset = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(subShot->mOffset, &assignmentCaller, makePosition(0, 0, 0));
 	Vector3D velocity = makePosition(0, 0, 0);
-	
-	if (subShot->mHasVelocity) {
-		velocity = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(subShot->mVelocity, NULL, makePosition(0, 0, 0));
-	}
-	if (subShot->mHasAngle) {
-		double angle = evaluateMugenAssignmentAndReturnAsFloat(subShot->mAngle, NULL);
-		velocity = getDirectionFromAngleZ(angle);
-		offset = vecRotateZ(offset, angle);
+	assignmentCaller.mOffsetReference = &offset; // TODO: better
+
+	if (subShot->mHasAbsolutePosition) {
+		caller->mPosition = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(subShot->mAbsolutePosition, &assignmentCaller, makePosition(0, 0, 0));
 	}
 
+	if (subShot->mHasVelocity) {
+		velocity = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(subShot->mVelocity, &assignmentCaller, makePosition(0, 0, 0));
+	}
+	double angle = 0;
+	if (subShot->mHasAngle) {
+		angle = evaluateMugenAssignmentAndReturnAsFloat(subShot->mAngle, &assignmentCaller);
+		velocity = getDirectionFromAngleZ(angle);
+		offset = vecRotateZ(offset, angle);
+
+		angle *= -1; // TODO: fix
+	}
+	
 	if (subShot->mHomingType == SHOT_TYPE_TARGET_RANDOM) {
 		Position p = vecAdd(caller->mPosition, offset);
 		Position enemyPos = getRandomEnemyOrBossPosition();
@@ -311,7 +360,7 @@ static void addSingleSubShot(void* tCaller, void* tData) {
 	}
 
 	if (subShot->mHasSpeed) {
-		double speed = evaluateMugenAssignmentAndReturnAsFloat(subShot->mSpeed, NULL);
+		double speed = evaluateMugenAssignmentAndReturnAsFloat(subShot->mSpeed, &assignmentCaller);
 		velocity = vecScale(vecNormalize(velocity), speed);
 	}
 
@@ -322,13 +371,26 @@ static void addSingleSubShot(void* tCaller, void* tData) {
 	e->mCollider = makeColliderFromCirc(subShot->mColCirc);
 	e->mCollisionID = addColliderToCollisionHandler(caller->mRoot->mCollisionData.mCollisionList, getHandledPhysicsPositionReference(e->mPhysicsID), e->mCollider, shotHitCB, e, &caller->mRoot->mCollisionData);
 
-	e->mAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, subShot->mIdleAnimation), &gData.mSprites, makePosition(0,0,10));
+	e->mAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, subShot->mIdleAnimation), &gData.mSprites, makePosition(0, 0, 10));
 	setMugenAnimationBasePosition(e->mAnimationID, getHandledPhysicsPositionReference(e->mPhysicsID));
-	
-	e->mRotation = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(subShot->mStartRotation, NULL, 0);
-	setMugenAnimationDrawAngle(e->mAnimationID, e->mRotation); 
+
+	e->mRotation = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(subShot->mStartRotation, &assignmentCaller, angle);
+	setMugenAnimationDrawAngle(e->mAnimationID, e->mRotation);
 
 	e->mListID = list_push_back_owned(&caller->mRoot->mSubShots, e);
+}
+
+static void addSubShot(void* tCaller, void* tData) {
+	SubShotCaller* caller = tCaller;
+	SubShotType* subShot = tData;
+
+	int amount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(subShot->mAmount, NULL, 1);
+	int i;
+	for (i = 0; i < amount; i++) {
+		addSingleSubShot(caller, subShot, i);
+	}
+
+	
 }
 
 void addShot(int tID, int tCollisionList, Position tPosition)
@@ -343,23 +405,31 @@ void addShot(int tID, int tCollisionList, Position tPosition)
 	SubShotCaller caller;
 	caller.mRoot = e;
 	caller.mPosition = tPosition;
-	list_map(&e->mType->mSubShots, addSingleSubShot, &caller);
+	list_map(&e->mType->mSubShots, addSubShot, &caller);
 }
 
-static int removeAllShotsForSingleSubShot(void* tCaller, void* tData) {
+typedef struct {
+	int mCollisionList;
+} RemoveShotsForSingleListCaller;
+
+static int removeShotTypeForSingleSubShot(void* tCaller, void* tData) {
 	(void)tCaller;
 	ActiveSubShot* e = tData;
 	unloadSubShot(e);
 	return 1;
 }
 
-static void removeAllShotsForSingleShot(void* tCaller, void* tData) {
-	(void)tCaller;
+static void removeShotTypeForSingleShot(void* tCaller, void* tData) {
 	ActiveShot* e = tData;
-	list_remove_predicate(&e->mSubShots, removeAllShotsForSingleSubShot, NULL);
+	RemoveShotsForSingleListCaller* caller = tCaller;
+	if (caller->mCollisionList != e->mCollisionData.mCollisionList) return;
+
+	list_remove_predicate(&e->mSubShots, removeShotTypeForSingleSubShot, NULL);
 }
 
-void removeAllShots()
+void removeEnemyShots()
 {
-	list_map(&gData.mActiveShots, removeAllShotsForSingleShot, NULL);
+	RemoveShotsForSingleListCaller caller;
+	caller.mCollisionList = getEnemyShotCollisionList();
+	list_map(&gData.mActiveShots, removeShotTypeForSingleShot, &caller);
 }

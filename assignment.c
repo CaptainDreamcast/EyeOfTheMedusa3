@@ -7,6 +7,9 @@
 #include <tari/math.h>
 
 #include "boss.h"
+#include "shothandler.h"
+#include "enemyhandler.h"
+#include "player.h"
 
 
 static void fetchRandFromValue(char* tDst, void* tCaller, char* tIndex) {
@@ -26,11 +29,22 @@ static void fetchPI(char* tDst, void* tCaller) {
 	sprintf(tDst, "3.14159");
 }
 
+static void fetchInfinity(char* tDst, void* tCaller) {
+	(void)tCaller;
+	sprintf(tDst, "%d", INF);
+}
+
 void loadGameAssignments()
 {
 	resetMugenAssignmentContext();
 	addMugenAssignmentVariable("pi", fetchPI);
 	addMugenAssignmentVariable("bosstime", fetchBossTimeVariable);
+	addMugenAssignmentVariable("angletowardsplayer", getShotAngleTowardsPlayer);
+	addMugenAssignmentVariable("inf", fetchInfinity);
+	addMugenAssignmentVariable("curenemy", getCurrentEnemyIndex);
+	addMugenAssignmentVariable("cursubshot", getCurrentSubShotIndex);
+	addMugenAssignmentVariable("localdeathcount", getLocalDeathCountVariable);
+	addMugenAssignmentVariable("localbombcount", getLocalBombCountVariable);
 	addMugenAssignmentArray("randfrom", fetchRandFromValue);
 	
 }
