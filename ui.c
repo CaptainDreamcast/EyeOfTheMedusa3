@@ -3,9 +3,11 @@
 #include <tari/animation.h>
 #include <tari/texthandler.h>
 #include <tari/math.h>
+#include <tari/mugenanimationhandler.h>
 
 static struct {
-	TextureData mTexture;
+	MugenSpriteFile mSprites;
+	MugenAnimation* mAnimation;
 	int mAnimationID;
 
 	int mPowerTextID;
@@ -16,8 +18,10 @@ static struct {
 static void loadUserInterface(void* tData) {
 	(void)tData;
 	
-	gData.mTexture = loadTexture("assets/ui/BG.pkg");
-	gData.mAnimationID = playOneFrameAnimationLoop(makePosition(0, 327, 80), &gData.mTexture);
+	gData.mSprites = loadMugenSpriteFileWithoutPalette("assets/ui/UI.sff");
+	gData.mAnimation = createOneFrameMugenAnimationForSprite(0, 0);
+
+	gData.mAnimationID = addMugenAnimation(gData.mAnimation, &gData.mSprites, makePosition(0, 327, 80));
 
 	gData.mLifeAmountTextID = addHandledText(makePosition(540, 350, 81), "0", 0, COLOR_WHITE, makePosition(30, 30, 30), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
 	gData.mBombAmountTextID = addHandledText(makePosition(540, 387, 81), "0", 0, COLOR_WHITE, makePosition(30, 30, 30), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
