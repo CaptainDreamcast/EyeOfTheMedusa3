@@ -63,10 +63,4 @@ build_develop: $(OBJS)
 	$(OBJS) -lkmg $(OPTIONAL_LIBS) -lm -ltremor -ltari $(OBJEXTRA) $(KOS_LIBS)
 	$(KOS_OBJCOPY) -O binary $(TARGET).elf $(TARGET).BIN
 
-build_deploy: $(OBJS) 
-	$(KOS_CC) $(KOS_CFLAGS) -I${KOS_BASE}/../extensions/include $(KOS_LDFLAGS) \
-	-o $(TARGET).elf $(KOS_START) \
-	$(OBJS) -lkmg $(OPTIONAL_LIBS) -lm -ltremor -ltari $(OBJEXTRA) $(KOS_LIBS)
-	$(KOS_OBJCOPY) -O binary $(TARGET).elf $(TARGET).BIN
-
 include $(KOS_BASE)/Makefile.rules
