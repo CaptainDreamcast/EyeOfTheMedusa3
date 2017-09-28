@@ -60,7 +60,7 @@ clean:
 build_develop: $(OBJS) 
 	$(KOS_CC) $(KOS_CFLAGS) -DDEVELOP -I${KOS_BASE}/../extensions/include $(KOS_LDFLAGS) \
 	-o $(TARGET).elf $(KOS_START) \
-	$(OBJS) -lkmg $(OPTIONAL_LIBS) -lm -ltremor -ltari $(OBJEXTRA) $(KOS_LIBS)
+	$(OBJS) -lkmg $(OPTIONAL_LIBS) -ltari -lpng -lz -ltremor -lm $(OBJEXTRA) $(KOS_LIBS)
 	$(KOS_OBJCOPY) -O binary $(TARGET).elf $(TARGET).BIN
 
 include $(KOS_BASE)/Makefile.rules
