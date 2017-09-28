@@ -9,6 +9,7 @@
 #include <tari/math.h>
 #include <tari/screeneffect.h>
 #include <tari/wrapper.h>
+#include <tari/mugenanimationhandler.h>
 
 #include "collision.h"
 #include "shothandler.h"
@@ -18,8 +19,8 @@
 #include "continuehandler.h"
 
 static struct {
-	TextureData mIdleTextures[10];
-	Animation mIdleAnimation;
+	MugenSpriteFile mSprites;
+	MugenAnimations mAnimations;
 
 	TextureData mHitboxTexture;
 	int mHitBoxAnimationID;
@@ -70,15 +71,14 @@ static void loadPlayer(void* tData) {
 	setLifeText(gData.mLifeAmount);
 	setBombText(gData.mBombAmount);
 
-	gData.mIdleAnimation = createEmptyAnimation();
-	gData.mIdleAnimation.mFrameAmount = 1;
-	loadConsecutiveTextures(gData.mIdleTextures, "assets/player/KAT.pkg", gData.mIdleAnimation.mFrameAmount);
+	gData.mSprites = loadMugenSpriteFileWithoutPalette("assets/player/PLAYER.sff");
+	gData.mAnimations = loadMugenAnimationFile("assets/player/PLAYER.air");
 
 	gData.mPhysicsID = addToPhysicsHandler(makePosition(40, 200, 3));
 	setHandledPhysicsDragCoefficient(gData.mPhysicsID, makePosition(0.3, 0.3, 0));
 
-	gData.mAnimationID = playAnimationLoop(makePosition(-(23 + 8), -(12 + 8), 0), gData.mIdleTextures, gData.mIdleAnimation, makeRectangleFromTexture(gData.mIdleTextures[0]));
-	setAnimationBasePositionReference(gData.mAnimationID, getHandledPhysicsPositionReference(gData.mPhysicsID));
+	gData.mAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, 1), &gData.mSprites, makePosition(0, 0, 0));
+	setMugenAnimationBasePosition(gData.mAnimationID, getHandledPhysicsPositionReference(gData.mPhysicsID));
 
 	gData.mCollisionData.mCollisionList = getPlayerCollisionList();
 	gData.mCollider = makeColliderFromCirc(makeCollisionCirc(makePosition(0, 0, 0), 5));
@@ -200,7 +200,7 @@ static void updateBeingHit() {
 
 	if (handleDurationAndCheckIfOver(&gData.mIsHitNow, gData.mIsHitDuration)) {
 		gData.mIsHit = 0;
-		setAnimationTransparency(gData.mAnimationID, 1);
+		setMugenAnimationTransparency(gData.mAnimationID, 1);
 	}
 }
 
@@ -259,7 +259,7 @@ static void setHit() {
 	Position pos = *getHandledPhysicsPositionReference(gData.mPhysicsID);
 	addExplosionEffect(pos);
 
-	setAnimationTransparency(gData.mAnimationID, 0.5);
+	setMugenAnimationTransparency(gData.mAnimationID, 0.5);
 	gData.mIsHit = 1;
 	gData.mIsHitNow = 0;
 }
