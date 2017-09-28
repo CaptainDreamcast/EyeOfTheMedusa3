@@ -7,12 +7,14 @@
 #include <tari/mugenassignmentevaluator.h>
 #include <tari/log.h>
 #include <tari/system.h>
+#include <tari/wrapper.h>
 
 #include "enemyhandler.h"
 #include "banter.h"
 #include "boss.h"
 #include "bg.h"
 #include "player.h"
+#include "gamescreen.h"
 
 typedef struct {
 	TextureData mTextures[10];
@@ -184,7 +186,6 @@ static void loadStage(MugenDefScript* tScript) {
 
 static void loadLevelHandler(void* tData) {
 	(void)tData;
-	gData.mCurrentLevel = 2; // TODO
 	gData.mStageActions = new_list();
 
 	char path[1024];
@@ -278,3 +279,25 @@ ActorBlueprint LevelHandler = {
 	.mLoad = loadLevelHandler,
 	.mUpdate = updateLevelHandler,
 };
+
+void setLevelToStart()
+{
+	gData.mCurrentLevel = 3;
+}
+
+void goToNextLevel()
+{
+	gData.mCurrentLevel++;
+	setNewScreen(&GameScreen);
+}
+
+void fetchStagePartTime(char * tDst, void * tCaller)
+{
+	(void)tCaller;
+	sprintf(tDst, "%d", (int)gData.mTime);
+}
+
+void advanceStagePart()
+{
+	gData.mStagePart++;
+}

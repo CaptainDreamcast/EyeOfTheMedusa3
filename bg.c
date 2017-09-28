@@ -4,6 +4,7 @@
 #include <tari/mugendefreader.h>
 #include <tari/mugenscriptparser.h>
 #include <tari/animation.h>
+#include <tari/wrapper.h>
 
 typedef struct {
 	Position mPosition;
@@ -80,6 +81,8 @@ void setBackground(char* tPath, MugenSpriteFile* tSprites) {
 }
 
 static void updatePosition() {
+	if (isWrapperPaused()) return;
+
 	gData.mBasePosition.x += gData.mSpeed;
 	if (gData.mBasePosition.x >= gData.mSize) {
 		gData.mBasePosition.x -= gData.mSize;

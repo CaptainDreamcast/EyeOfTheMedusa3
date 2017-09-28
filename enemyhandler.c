@@ -10,10 +10,12 @@
 #include <tari/mugenanimationhandler.h>
 #include <tari/math.h>
 #include <tari/mugenassignmentevaluator.h>
+#include <tari/wrapper.h>
 
 #include "shothandler.h"
 #include "collision.h"
 #include "itemhandler.h"
+#include "effecthandler.h"
 
 typedef struct {
 	int mIdleAnimation;
@@ -122,11 +124,21 @@ static void enemyHitCB(void* tCaller, void* tCollisionData) {
 	
 	e->mHealth--;
 	if (e->mHealth) return;
-	// TODO
+	
+	
 
 	Position pos = *getHandledPhysicsPositionReference(e->mPhysicsID);
+	
+	addExplosionEffect(pos);
+	
 	int powerAmount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mEnemyBase->mSmallPowerAmount, NULL, 0);
 	addSmallPowerItems(pos, powerAmount);
+
+	int lifeAmount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mEnemyBase->mLifeDropAmount, NULL, 0);
+	addLifeItems(pos, lifeAmount);
+
+	int bombAmount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mEnemyBase->mBombDropAmount, NULL, 0);
+	addBombItems(pos, bombAmount);
 
 	removeActiveEnemy(e);
 	list_remove(&gData.mActiveEnemies, e->mListID);
@@ -166,15 +178,16 @@ static void addSingleEnemy(StageEnemy* tEnemy, int i) {
 
 	e->mWaitDuration = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(tEnemy->mWaitDuration, &caller, 120);
 
-	e->mAnimationID = addMugenAnimation(getMugenAnimation(gData.mEnemyAnimations, getEnemyTypeIdleAnimation(e->mType)), gData.mEnemySprites, makePosition(0, 0, 0));
+	e->mAnimationID = addMugenAnimation(getMugenAnimation(gData.mEnemyAnimations, getEnemyTypeIdleAnimation(e->mType)), gData.mEnemySprites, makePosition(0, 0, 50));
 	setMugenAnimationBasePosition(e->mAnimationID, getHandledPhysicsPositionReference(e->mPhysicsID));
 	e->mCollisionData.mCollisionList = getEnemyCollisionList();
+	e->mCollisionData.mIsItem = 0;
 	setMugenAnimationCollisionActive(e->mAnimationID, getEnemyCollisionList(), enemyHitCB, e, &e->mCollisionData);
-
+	
 	e->mHealth = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(tEnemy->mHealth, &caller, 10);
 
 	e->mListID = list_push_back_owned(&gData.mActiveEnemies, e);
-
+	
 }
 
 void addEnemy(StageEnemy* tEnemy)
@@ -295,7 +308,7 @@ static int updateSingleActiveEnemy(void* tCaller, void* tData) {
 	
 	updateEnemyWait(e);
 	updateEnemyMovement(e);
-
+	
 	Position p = *getHandledPhysicsPositionReference(e->mPhysicsID);
 	if (p.x < -100) {
 		removeActiveEnemy(e);
@@ -309,7 +322,7 @@ static int updateSingleActiveEnemy(void* tCaller, void* tData) {
 
 static void updateEnemyHandler(void* tData) {
 	(void)tData;
-	
+	if (isWrapperPaused()) return;
 	list_remove_predicate(&gData.mActiveEnemies, updateSingleActiveEnemy, NULL);
 }
 

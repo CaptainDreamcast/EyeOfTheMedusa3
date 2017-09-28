@@ -12,10 +12,14 @@
 #include <tari/mugenassignmentevaluator.h>
 #include <tari/animation.h>
 #include <tari/texthandler.h>
+#include <tari/wrapper.h>
+#include <tari/screeneffect.h>
 
 #include "collision.h"
 #include "shothandler.h"
 #include "itemhandler.h"
+#include "level.h"
+#include "player.h"
 
 typedef enum {
 	BOSS_ACTION_TYPE_GOTO,
@@ -23,13 +27,19 @@ typedef enum {
 	BOSS_ACTION_TYPE_DROP_SMALL_POWER,
 	BOSS_ACTION_TYPE_ADD_ROTATION,
 	BOSS_ACTION_TYPE_SET_ROTATION,
+	BOSS_ACTION_TYPE_ADVANCE_STAGE_PART,
+	BOSS_ACTION_TYPE_FADE_TO_WHITE,
+	BOSS_ACTION_TYPE_CHANGE_ANIMATION,
+	BOSS_ACTION_TYPE_DISABLE_PLAYER_HIT,
+	BOSS_ACTION_TYPE_SET_AID_TEXT,
+
 } BossActionType;
 
 
 typedef struct {
 	MugenAssignment* mTarget;
 	MugenAssignment* mSpeed;
-
+	
 } GotoAction;
 
 typedef struct {
@@ -59,13 +69,20 @@ typedef struct {
 	MugenAssignment* mValue;
 } SingleValueAction;
 
+typedef enum {
+	AID_TEXT_DOWN,
+	AID_TEXT_UP,
+	AID_TEXT_MID,
+} AidTextDirection;
+
 static struct {
 	int mIsActive;
 	int mIsLoaded;
 	int mIdleAnimationNumber;
 	MugenAnimation* mIdleAnimation;
 	MugenSpriteFile* mSprites;
-	
+	MugenAnimations* mAnimations;
+
 	char* mName;
 	int mLifeMax;
 	int mLife;
@@ -88,6 +105,10 @@ static struct {
 
 	double mSpeed;
 	double mRotation;
+
+	int mIsDefeated;
+
+	AidTextDirection mAidTextDirection;
 } gData;
 
 static void loadBossHandler(void* tData) {
@@ -167,6 +188,26 @@ static void loadActionType(BossAction* e, MugenDefScriptGroup* tGroup) {
 		e->mType = BOSS_ACTION_TYPE_ADD_ROTATION;
 		loadSingleValueAction(e, tGroup);
 	}
+	else if (!strcmp("stagepartadvance", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_ADVANCE_STAGE_PART;
+		loadSingleValueAction(e, tGroup);
+	}
+	else if (!strcmp("fadewhite", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_FADE_TO_WHITE;
+		loadSingleValueAction(e, tGroup);
+	}
+	else if (!strcmp("changeanim", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_CHANGE_ANIMATION;
+		loadSingleValueAction(e, tGroup);
+	}
+	else if (!strcmp("disableplayerhit", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_DISABLE_PLAYER_HIT;
+		loadSingleValueAction(e, tGroup);
+	}
+	else if (!strcmp("setaidtextrandom", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_SET_AID_TEXT;
+		loadSingleValueAction(e, tGroup);
+	}
 	else {
 		logError("Unrecognized action type");
 		logErrorString(typeString);
@@ -204,9 +245,11 @@ void loadBossFromDefinitionPath(char * tDefinitionPath, MugenAnimations* tAnimat
 
 	unloadMugenDefScript(script);
 
+	gData.mAnimations = tAnimations;
 	gData.mIdleAnimation = getMugenAnimation(tAnimations, gData.mIdleAnimationNumber);
 	gData.mSprites = tSprites;
 	gData.mCollisionData.mCollisionList = getEnemyCollisionList();
+	gData.mCollisionData.mIsItem = 0;
 
 	gData.mIsLoaded = 1;
 }
@@ -221,12 +264,23 @@ static void updateHealthBarSize() {
 	setAnimationSize(gData.mHealthBarAnimationID, makePosition(length, 10, 1), makePosition(0, 0, 0));
 }
 
+static void setBossDefeated() {
+	gData.mIsDefeated = 1;
+	goToNextLevel();
+}
+
 static void bossHitCB(void* tCaller, void* tCollisionData) {
 	(void)tCaller;
 	(void)tCollisionData;
 
+	if (gData.mIsDefeated) return;
+
 	gData.mLife--;
 	updateHealthBarSize();
+
+	if (gData.mLife <= 0) {
+		setBossDefeated();
+	}
 }
 
 void activateBoss() {
@@ -252,6 +306,7 @@ void activateBoss() {
 	setAnimationColorType(gData.mHealthBarAnimationID, COLOR_DARK_RED);
 	updateHealthBarSize();
 
+	gData.mIsDefeated = 0;
 	gData.mIsActive = 1;
 }
 
@@ -272,6 +327,13 @@ Position getBossPosition()
 	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
 	return p;
 }
+
+void evaluateTextAidFunction(char * tDst, void * tCaller)
+{
+	(void)tCaller;
+	sprintf(tDst, "%d", gData.mAidTextDirection);
+}
+
 
 static void updateGoingToNextPattern() {
 	if (gData.mCurrentPattern >= vector_size(&gData.mPatterns) - 1) return;
@@ -327,6 +389,34 @@ static void performAddingRotation(BossAction* tAction) {
 	setMugenAnimationDrawAngle(gData.mAnimationID, gData.mRotation);
 }
 
+static void performStagePartAdvancement() {
+	advanceStagePart();
+}
+
+static void fadeOutOver(void* tCaller) {
+	(void)tCaller;
+	enableDrawing();
+}
+
+static void performAnimationChange(BossAction* tAction) {
+	SingleValueAction* e = tAction->mData;
+
+	int value = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mValue, NULL, 0);
+	changeMugenAnimation(gData.mAnimationID, getMugenAnimation(gData.mAnimations, value));
+}
+
+static void performFadeToWhite() {
+	addFadeOut(179, fadeOutOver, NULL);
+}
+
+static void performPlayerHitDisable() {
+	disablePlayerBossCollision();
+}
+
+static void performSettingRandomAidText() {
+	gData.mAidTextDirection = randfromInteger(AID_TEXT_DOWN, AID_TEXT_MID);
+}
+
 static void performAction(BossAction* e) {
 	if (e->mType == BOSS_ACTION_TYPE_GOTO) {
 		performGoto(e);
@@ -342,6 +432,21 @@ static void performAction(BossAction* e) {
 	}
 	else if (e->mType == BOSS_ACTION_TYPE_ADD_ROTATION) {
 		performAddingRotation(e);
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_ADVANCE_STAGE_PART) {
+		performStagePartAdvancement();
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_FADE_TO_WHITE) {
+		performFadeToWhite();
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_CHANGE_ANIMATION) {
+		performAnimationChange(e);
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_DISABLE_PLAYER_HIT) {
+		performPlayerHitDisable();
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_SET_AID_TEXT) {
+		performSettingRandomAidText();
 	}
 	else {
 		logError("Unrecognized boss action type");
@@ -396,6 +501,8 @@ static void updateTime() {
 static void updateBoss(void* tData) {
 	(void)tData;
 	if (!gData.mIsActive) return;
+	if (isWrapperPaused()) return;
+
 	updateGoingToNextPattern();
 	updateActions();
 	updateMovement();

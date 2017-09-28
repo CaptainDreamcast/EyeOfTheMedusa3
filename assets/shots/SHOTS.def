@@ -6,33 +6,112 @@ id = 0
 
 [SubShot]
 type = homing
-anim = 3
+anim = 5
 hitanim = 2
-offset = 0,0
+offset = 42,-3
 velocity = 4,0
 center = 0,0
-radius = 3
+radius = 4
+color = identity("rainbow")
 
 [Shot]
 id = 1
 
 [SubShot]
+amount = 2
 type = homing
-anim = 3
+anim = 5
 hitanim = 2
-offset = 0,-10
+offset = 42,-8 + 10*cursubshot
 velocity = 4,0
 center = 0,0
-radius = 3
+radius = 4
+color = identity("rainbow")
+
+[Shot]
+id = 2
+
+[SubShot]
+amount = 2
+type = homing
+anim = 5
+hitanim = 2
+offset = 42,-13 + 20*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 4
+color = identity("rainbow")
 
 [SubShot]
 type = homing
-anim = 3
+anim = 5
 hitanim = 2
-offset = 0,10
+offset = 47,-3
 velocity = 4,0
 center = 0,0
-radius = 3
+radius = 4
+color = identity("rainbow")
+
+[Shot]
+id = 3
+
+[SubShot]
+amount = 2
+type = homing
+anim = 5
+hitanim = 2
+offset = 42,-18 + 30*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 4
+color = identity("rainbow")
+
+[SubShot]
+amount = 2
+type = homing
+anim = 5
+hitanim = 2
+offset = 47,-8 + 10*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 4
+color = identity("rainbow")
+
+[Shot]
+id = 4
+
+[SubShot]
+amount = 2
+type = homing
+anim = 5
+hitanim = 2
+offset = 37,-28 + 50*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 4
+color = identity("rainbow")
+
+[SubShot]
+amount = 2
+type = homing
+anim = 5
+hitanim = 2
+offset = 42,-18 + 30*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 4
+color = identity("rainbow")
+
+[SubShot]
+amount = 2
+type = homing
+anim = 5
+hitanim = 2
+offset = 47,-8 + 10*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 4
+color = identity("rainbow")
 
 ; LINEAR
 [Shot]
@@ -40,51 +119,142 @@ id = 10
 
 [SubShot]
 type = normal
-anim = 3
+anim = 4
 hitanim = 3
-offset = 0,-5
+offset = 42,-8
 velocity = 4,0
 center = 0,0
-radius = 3
+radius = 2
+color = identity("rainbow")
 
 [SubShot]
 type = normal
-anim = 3
+anim = 4
 hitanim = 3
-offset = 0,5
+offset = 42,2
 velocity = 4,0
 center = 0,0
-radius = 3
+radius = 2
+color = identity("rainbow")
 
 [Shot]
 id = 11
 
 [SubShot]
+amount = 2
 type = normal
-anim = 3
+anim = 4
 hitanim = 3
-offset = 0,-10
+offset = 42,-13 + 20*cursubshot
 velocity = 4,0
 center = 0,0
-radius = 3
+radius = 2
+color = identity("rainbow")
 
 [SubShot]
 type = normal
-anim = 3
+anim = 4
 hitanim = 3
-offset = 5,0
+offset = 47,-3
 velocity = 4,0
 center = 0,0
-radius = 3
+radius = 2
+color = identity("rainbow")
+
+[Shot]
+id = 12
+
+[SubShot]
+amount = 4
+type = normal
+anim = 4
+hitanim = 3
+offset = 42,-18 + 10*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 2
+color = identity("rainbow")
+
+[Shot]
+id = 13
+
+[SubShot]
+amount = 2
+type = normal
+anim = 4
+hitanim = 3
+offset = 42,-23 + 40*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 2
+color = identity("rainbow")
+
+[SubShot]
+amount = 2
+type = normal
+anim = 4
+hitanim = 3
+offset = 47,-13 + 20*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 2
+color = identity("rainbow")
 
 [SubShot]
 type = normal
-anim = 3
+anim = 4
 hitanim = 3
-offset = 0,10
+offset = 52,-3
 velocity = 4,0
 center = 0,0
-radius = 3
+radius = 2
+color = identity("rainbow")
+
+[Shot]
+id = 14
+
+[SubShot]
+amount = 2
+type = normal
+anim = 4
+hitanim = 3
+offset = 37,-33 + 60*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 2
+color = identity("rainbow")
+
+[SubShot]
+amount = 2
+type = normal
+anim = 4
+hitanim = 3
+offset = 42,-23 + 40*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 2
+color = identity("rainbow")
+
+[SubShot]
+amount = 2
+type = normal
+anim = 4
+hitanim = 3
+offset = 47,-13 + 20*cursubshot
+velocity = 4,0
+center = 0,0
+radius = 2
+color = identity("rainbow")
+
+[SubShot]
+type = normal
+anim = 4
+hitanim = 3
+offset = 52,-3
+velocity = 4,0
+center = 0,0
+radius = 2
+color = identity("rainbow")
 
 ; BOMB SHOT
 [Shot]
@@ -98,6 +268,7 @@ center = 0,0
 radius = 3
 speed = 10
 offset = randfrom(-30,30), randfrom(-30,30)
+color = identity("rainbow")
 
 ; ENEMY
 
@@ -114,6 +285,7 @@ angle = angleTowardsPlayer
 speed = 6
 center = 0,0
 radius = 3
+color = identity("green")
 
 [SubShot]
 type = normal
@@ -124,6 +296,7 @@ angle = angleTowardsPlayer
 speed = 6
 center = 0,0
 radius = 3
+color = identity("green")
 
 ; Slow shot towards player
 [Shot] 
@@ -138,6 +311,7 @@ angle = angleTowardsPlayer
 speed = 1
 center = 0,0
 radius = 3
+color = identity("green")
 
 [SubShot]
 type = normal
@@ -148,7 +322,100 @@ angle = angleTowardsPlayer
 speed = 1
 center = 0,0
 radius = 3
+color = identity("green")
 
+; medium-fast shot towards player with spray
+[Shot]   
+id = 102
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,10
+angle = angleTowardsPlayer + randfrom(-0.1, 0.1)
+speed = 6 
+center = 0,0
+radius = 3
+color = identity("green")
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer + randfrom(-0.1, 0.1)
+speed = 6
+center = 0,0
+radius = 3
+color = identity("green")
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,-10
+angle = angleTowardsPlayer + randfrom(-0.1, 0.1)
+speed = 6
+center = 0,0
+radius = 3
+color = identity("green")
+
+; medium-fast random shot
+[Shot]   
+id = 103
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,10
+angle = randfrom(0, 2*PI)
+speed = 4 
+center = 0,0
+radius = 3
+color = identity("green")
+
+; slow random shot
+[Shot]   
+id = 104
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,10
+angle = randfrom(0, 2*PI)
+speed = 0.5 
+center = 0,0
+radius = 3
+color = identity("green")
+
+; First midboss
+[Shot] 
+id = 120
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(0, 2*PI)
+speed = 0.5
+center = 0,0
+radius = 3
+color = identity("green")
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(0, 2*PI)
+speed = 4
+center = 0,0
+radius = 3
+color = identity("green")
 
 ; -------------------------ANGELS
 [Shot]   
@@ -163,6 +430,239 @@ angle = angleTowardsPlayer
 speed = 4
 center = 0,0
 radius = 3
+
+; STRAIGHT SHOT
+[Shot]   
+id = 201
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = PI
+speed = 4
+center = 0,0
+radius = 3
+
+; LOCK SHOT
+[Shot]   
+id = 202
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer + 0.2
+speed = 4
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer - 0.2
+speed = 4
+center = 0,0
+radius = 3
+
+; RANDOM SHOT
+[Shot]   
+id = 203
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(0,2*PI)
+speed = 5
+center = 0,0
+radius = 3
+
+; TRIPLE SHOT
+[Shot]   
+id = 204
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer + 0.2
+speed = 4
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer
+speed = 4
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer - 0.2
+speed = 4
+center = 0,0
+radius = 3
+
+; ANGEL MIDBOSS
+[Shot]   
+id = 250
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(0,2*PI)
+speed = 4
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = ((StagePartTime % 600) / 600.0) * 2* PI
+speed = 4
+center = 0,0
+radius = 3
+
+[SubShot]
+type = normal
+anim = 5001
+hitanim = 5001
+absolute = randfrom(0, 640),-20
+velocity = 0,randfrom(1, 2)
+center = 0,0
+radius = 2
+rotationadd = randfrom(-0.1, -0.2)
+
+; -------------------------TANKS
+; SPRAY
+[Shot]   
+id = 300
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = PI+randfrom(-0.4,0.4)
+speed = 5
+center = 0,0
+radius = 3
+color = identity("red")
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(-0.4,0.4)
+speed = 5
+center = 0,0
+radius = 3
+color = identity("red")
+
+; AIM
+[Shot]   
+id = 301
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer
+speed = 4
+center = 0,0
+radius = 3
+color = identity("yellow")
+
+; LOCK
+[Shot]   
+id = 302
+
+[SubShot]
+amount = 2
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = angleTowardsPlayer + (-0.2 + cursubshot*0.4)
+speed = 7
+center = 0,0
+radius = 3
+color = identity("grey")
+
+; STRAIGHT
+[Shot]   
+id = 303
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = PI
+speed = 6
+center = 0,0
+radius = 3
+
+; RANDOM
+[Shot]   
+id = 304
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(0, 2*PI)
+speed = 5
+center = 0,0
+radius = 3
+color = identity("green")
+
+; MIDBOSS
+[Shot]   
+id = 350
+
+[SubShot]
+amount = 60
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(0, 2*PI)
+speed = 4
+center = 0,0
+radius = 3
+
+[SubShot]
+amount = 15
+type = normal
+anim = 5001
+hitanim = 5001
+absolute = randfrom(0, 640),-20
+velocity = 0,randfrom(0.5, 1)
+center = 0,0
+radius = 2
+rotationadd = randfrom(-0.1, -0.2)
 
 ; -------------------------GENERAL BARK
 [Shot]
@@ -250,6 +750,7 @@ velocity = 0,randfrom(1, 2)
 center = 0,0
 radius = 2
 rotationadd = randfrom(-0.1, -0.2)
+color = identity("green")
 
 [Shot]
 id = 1004
@@ -276,7 +777,7 @@ type = normal
 anim = 2001
 hitanim = 2001
 offset = 0,0
-angle = angleTowardsPlayer - 0.15 + 0.1 * cursubshot
+angle = angleTowardsPlayer - 0.30 + 0.2 * cursubshot + sin(BossTime)*0.05 
 speed = 8
 center = 0,0
 radius = 3
@@ -289,8 +790,227 @@ type = normal
 anim = 2001
 hitanim = 2001
 offset = 0,0
-angle = angleTowardsPlayer + randfrom(-0.05, 0.05)
+angle = angleTowardsPlayer + randfrom(-0.1, 0.1)
 speed = 1
 center = 0,0
 radius = 3
 
+[Shot]   
+id = 2003
+
+[SubShot]
+amount = 12
+type = normal
+anim = 2001
+hitanim = 2001
+absolute = cursubshot*50,-20
+offset = 0,0
+angle = PI / 2
+speed = 5
+center = 0,0
+radius = 3
+
+[SubShot]
+amount = 7
+type = normal
+anim = 2001
+hitanim = 2001
+absolute = 690,cursubshot*50
+offset = 0,0
+angle = PI
+speed = 5
+center = 0,0
+radius = 3
+
+[Shot]   
+id = 2004
+
+[SubShot]
+amount = 10
+type = normal
+anim = 2001
+hitanim = 2001
+offset = 0,0
+angle = angleTowardsPlayer + randfrom(-0.4, 0.4)
+speed = 3
+center = 0,0
+radius = 3
+
+[Shot]   
+id = 2005
+
+[SubShot]
+amount = 100
+type = normal
+anim = 2001
+hitanim = 2001
+offset = 0,0
+absolute = 320,163
+angle = randfrom(0,2*PI)
+speed = 0
+center = 0,0
+radius = 3
+gimmick = bigbang
+
+; -------------------------PARROT
+[Shot]   
+id = 3001
+
+[SubShot]
+amount = 200
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(0, 2*PI)
+speed = 4
+center = 0,0
+radius = 3
+color = identity("rainbow")
+
+
+[Shot]
+id = 3003
+
+[SubShot]
+type = normal
+anim = 5001
+hitanim = 5001
+absolute = randfrom(-50, 640),-20
+velocity = 0.5,randfrom(1, 2)
+center = 0,0
+radius = 2
+rotationadd = randfrom(-0.1, -0.2)
+color = identity("rainbow")
+
+[SubShot]
+type = normal
+anim = 5001
+hitanim = 5001
+absolute = randfrom(0, 690),-20
+velocity = -0.5,randfrom(1, 2)
+center = 0,0
+radius = 2
+rotationadd = randfrom(0.1, 0.2)
+color = identity("rainbow")
+
+[Shot]
+id = 3004
+
+[SubShot]
+type = normal
+anim = 5001
+hitanim = 5001
+absolute = randfrom(0, 640),-20
+velocity = 0,randfrom(0.5, 1)
+center = 0,0
+radius = 2
+rotationadd = randfrom(-0.1, -0.2)
+color = identity("rainbow")
+
+[Shot]
+id = 3005
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = PI + 0.5 + 0.2*sin(BossTime/10.0) + (BossTime / 180.0)
+speed = 6
+center = 0,0
+radius = 3
+color = identity("rainbow")
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = PI - 0.5 + 0.2*sin(BossTime/10.0) + (BossTime / 180.0)
+speed = 6
+center = 0,0
+radius = 3
+color = identity("rainbow")
+
+[Shot]
+id = 3006
+
+[SubShot]
+amount = 100
+type = normal
+anim = 3
+hitanim = 3
+offset = 0,0
+angle = randfrom(0, 2*PI)
+speed = randfrom(0.1, 6)
+center = 0,0
+radius = 3
+color = identity("rainbow")
+
+[Shot]
+id = 3007
+
+[SubShot]
+amount = 100
+type = normal
+anim = 3
+hitanim = 3
+offset = 100,-50
+angle = randfrom(0, 2*PI)
+speed = randfrom(0.1, 6)
+center = 0,0
+radius = 3
+color = identity("rainbow")
+
+[SubShot]
+amount = 100
+type = normal
+anim = 3
+hitanim = 3
+offset = -100,-50
+angle = randfrom(0, 2*PI)
+speed = randfrom(0.1, 6)
+center = 0,0
+radius = 3
+color = identity("rainbow")
+
+[Shot]
+id = 3008
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+absolute = randfrom(0, 640),-20
+velocity = 1,1
+center = 0,0
+radius = 3
+color = identity("rainbow")
+gimmick = bounce
+
+[SubShot]
+type = normal
+anim = 3
+hitanim = 3
+absolute = randfrom(0, 640),-20
+velocity = -1,1
+center = 0,0
+radius = 3
+color = identity("rainbow")
+gimmick = bounce
+
+
+[Shot]
+id = 3009
+
+[SubShot]
+amount = 100
+type = normal
+anim = 3
+hitanim = 3
+absolute = 700,ifelse(textaid = 0, randfrom(0,300), ifelse(textaid = 1, randfrom(20, 327), ifelse(randfrominteger(0,1), randfrom(0, 140), randfrom(180, 327))))
+velocity = -15,0
+center = 0,0
+radius = 3
+color = identity("rainbow")

@@ -4,5 +4,3 @@
 
 
 extern Screen GameScreen;
-
-void setLevel(int i);

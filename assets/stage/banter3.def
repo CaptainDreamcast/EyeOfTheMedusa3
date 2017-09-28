@@ -1,0 +1,18 @@
+[Header]
+sprites = "assets/stage/banter3.sff"
+
+[RandomBossBanter]
+
+[RandomBossBanterStep]
+speaker = "General dog:"
+text = "banter banter banter banter"
+sprite = 3,0
+
+
+[ForcedBanter]
+trigger = start
+
+[ForcedBanterStep]
+speaker = "Kat:"
+text = "banter banter banter banter?"
+sprite = 0,0

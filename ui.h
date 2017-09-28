@@ -5,3 +5,5 @@
 extern ActorBlueprint UserInterface;
 
 void setPowerText(int tPower);
+void setLifeText(int tLifeAmount);
+void setBombText(int tBombAmount);

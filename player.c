@@ -4,10 +4,18 @@
 #include <tari/input.h>
 #include <tari/physicshandler.h>
 #include <tari/collisionhandler.h>
+#include <tari/log.h>
+#include <tari/system.h>
+#include <tari/math.h>
+#include <tari/screeneffect.h>
+#include <tari/wrapper.h>
 
 #include "collision.h"
 #include "shothandler.h"
 #include "ui.h"
+#include "effecthandler.h"
+#include "titlescreen.h"
+#include "continuehandler.h"
 
 static struct {
 	TextureData mIdleTextures[10];
@@ -19,13 +27,13 @@ static struct {
 	int mAnimationID;
 	int mPhysicsID;
 	int mCollisionID;
-
+	
 	CollisionData mCollisionData;
 	Collider mCollider;
 
 	int mItemCollisionID;
 	Collider mItemCollider;
-
+	
 	double mAcceleration;
 	double mFocusSpeed;
 	double mNormalSpeed;
@@ -43,12 +51,25 @@ static struct {
 
 	int mLocalBombCount;
 	int mLocalDeathCount;
+
+	int mLifeAmount;
+	int mBombAmount;
+	int mContinueAmount;
+
+	int mIsHit;
+	Duration mIsHitNow;
+	Duration mIsHitDuration;
+
+	int mCanBeHitByEnemies;
 } gData;
 
 static void playerHitCB(void* tCaller, void* tCollisionData);
 
 static void loadPlayer(void* tData) {
 	(void)tData;
+	setLifeText(gData.mLifeAmount);
+	setBombText(gData.mBombAmount);
+
 	gData.mIdleAnimation = createEmptyAnimation();
 	gData.mIdleAnimation.mFrameAmount = 1;
 	loadConsecutiveTextures(gData.mIdleTextures, "assets/player/KAT.pkg", gData.mIdleAnimation.mFrameAmount);
@@ -85,14 +106,21 @@ static void loadPlayer(void* tData) {
 	gData.mBombNow = 0;
 	gData.mBombDuration = 180;
 
-	gData.mPower = 0;
 	gData.mIsFocused = 0;
 
 	gData.mLocalBombCount = 0;
 	gData.mLocalDeathCount = 0;
+
+	gData.mIsHit = 0;
+	gData.mIsHitDuration = 120;
+
+	gData.mCanBeHitByEnemies = 1;
 }
 
 static void updateMovement() {
+	Position* pos = getHandledPhysicsPositionReference(gData.mPhysicsID);
+	*pos = clampPositionToGeoRectangle(*pos, makeGeoRectangle(0, 0, 640, 327));
+	
 	if (hasPressedLeft()) {
 		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(-gData.mAcceleration, 0, 0));
 	}
@@ -155,20 +183,45 @@ static void updateBomb() {
 		return;
 	}
 	
-	
+	if (!gData.mBombAmount) return;
+
 	if (hasPressedBFlank()) {
+		gData.mLocalBombCount++;
+		gData.mBombAmount--;
+		setBombText(gData.mBombAmount);
 		gData.mIsBombing = 1;
 		gData.mBombNow = 0;
 	}
 
 }
 
+static void updateBeingHit() {
+	if (!gData.mIsHit) return;
+
+	if (handleDurationAndCheckIfOver(&gData.mIsHitNow, gData.mIsHitDuration)) {
+		gData.mIsHit = 0;
+		setAnimationTransparency(gData.mAnimationID, 1);
+	}
+}
+
+static void handleSmallPowerItemCollection() {
+	gData.mPower = min(400, gData.mPower + 1);
+	setPowerText(gData.mPower);
+}
+
 static void updatePlayer(void* tData) {
 	(void)tData;
+	if (isWrapperPaused()) return;
+
 	updateMovement();
 	updateFocus();
 	updateShot();
 	updateBomb();
+	updateBeingHit();
+
+	if (hasPressedX()) { // TODO: remove
+		handleSmallPowerItemCollection();
+	}
 }
 
 ActorBlueprint Player = {
@@ -176,27 +229,92 @@ ActorBlueprint Player = {
 	.mUpdate = updatePlayer,
 };
 
-static void handlePowerItemCollection() {
-	gData.mPower++;
-	setPowerText(gData.mPower);
+static void handleLifeItemCollection() {
+	gData.mLifeAmount++;
+	setLifeText(gData.mLifeAmount);
+}
+
+static void handleBombItemCollection() {
+	gData.mBombAmount++;
+	setBombText(gData.mBombAmount);
+}
+
+static void handleItemCollection(CollisionData* tCollisionData) {
+	if (tCollisionData->mItemType == ITEM_TYPE_SMALL_POWER) {
+		handleSmallPowerItemCollection();
+	} else if (tCollisionData->mItemType == ITEM_TYPE_LIFE) {
+		handleLifeItemCollection();
+	}
+	else if (tCollisionData->mItemType == ITEM_TYPE_BOMB) {
+		handleBombItemCollection();
+	}
+	else {
+		logError("Unrecognized item type.");
+		logErrorInteger(tCollisionData->mItemType);
+		abortSystem();
+	}
+}
+
+static void setHit() {
+	Position pos = *getHandledPhysicsPositionReference(gData.mPhysicsID);
+	addExplosionEffect(pos);
+
+	setAnimationTransparency(gData.mAnimationID, 0.5);
+	gData.mIsHit = 1;
+	gData.mIsHitNow = 0;
+}
+
+static void goToGameOverScreen(void* tCaller) {
+	setNewScreen(&TitleScreen); // TODO
 }
 
 static void playerHitCB(void* tCaller, void* tCollisionData) {
 	(void)tCaller;
 	CollisionData* collisionData = tCollisionData;
 
-	if (collisionData->mCollisionList == getPowerItemCollisionList()) {
-		handlePowerItemCollection();
+	if (collisionData->mIsItem) {
+		handleItemCollection(collisionData);
 		return;
 	}
 
-	printf("ded\n"); // TODO
+	if (gData.mIsHit || gData.mIsBombing) return;
+	if (!gData.mCanBeHitByEnemies && collisionData->mCollisionList == getEnemyCollisionList()) return;
 
+	gData.mLocalDeathCount++;
+	
+	gData.mPower = max(0, gData.mPower - 100);
+	setPowerText(gData.mPower);
+
+	gData.mBombAmount = max(3, gData.mBombAmount);
+	setBombText(gData.mBombAmount);
+
+	if (!gData.mLifeAmount) {
+		if (gData.mContinueAmount) {
+			setContinueActive();
+		}
+		else {
+			addFadeOut(30, goToGameOverScreen, NULL);
+		}
+	}
+	else {
+		gData.mLifeAmount--;
+		setLifeText(gData.mLifeAmount);
+	}
+
+	setHit();
 }
 
 Position getPlayerPosition()
 {
 	return *getHandledPhysicsPositionReference(gData.mPhysicsID);
+}
+
+void resetPlayerState()
+{
+	gData.mPower = 200;
+	gData.mLifeAmount = 2; 
+	gData.mBombAmount = 99;
+	gData.mContinueAmount = 5;
 }
 
 void resetLocalPlayerCounts()
@@ -215,4 +333,29 @@ void getLocalBombCountVariable(char * tDst, void * tCaller)
 {
 	(void)tCaller;
 	sprintf(tDst, "%d", gData.mLocalBombCount);
+}
+
+void setPlayerToFullPower()
+{
+	gData.mPower = 400;
+	setPowerText(gData.mPower);
+	setLifeText(gData.mLifeAmount); // TODO: move
+	setBombText(gData.mBombAmount); // TODO: move
+}
+
+int getContinueAmount()
+{
+	return gData.mContinueAmount;
+}
+
+void reduceContinueAmount()
+{
+	gData.mLifeAmount = 2;
+	gData.mBombAmount = 99;
+	gData.mContinueAmount--;
+}
+
+void disablePlayerBossCollision()
+{
+	gData.mCanBeHitByEnemies = 0;
 }

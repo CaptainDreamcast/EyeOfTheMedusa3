@@ -12,6 +12,7 @@
 #include <tari/mugenscriptparser.h>
 #include <tari/mugenassignmentevaluator.h>
 #include <tari/math.h>
+#include <tari/wrapper.h>
 
 #include "collision.h"
 #include "enemyhandler.h"
@@ -26,9 +27,9 @@ typedef enum {
 
 typedef struct {
 	MugenAssignment* mAmount;
-	
+
 	ShotHomingType mHomingType;
-	
+
 	MugenAssignment* mOffset;
 
 	int mHasAbsolutePosition;
@@ -44,10 +45,13 @@ typedef struct {
 	MugenAssignment* mStartRotation;
 	MugenAssignment* mRotationAdd;
 
+	MugenAssignment* mGimmick;
+
 	int mIdleAnimation;
 	int mHitAnimation;
 
 	CollisionCirc mColCirc;
+	MugenAssignment* mColor;
 } SubShotType;
 
 typedef struct {
@@ -66,7 +70,7 @@ typedef struct {
 
 typedef struct {
 	ActiveShot* mRoot;
-	
+
 	SubShotType* mType;
 
 	int mPhysicsID;
@@ -77,6 +81,9 @@ typedef struct {
 	int mListID;
 
 	double mRotation;
+
+	int mHasGimmickData;
+	void* mGimmickData;
 } ActiveSubShot;
 
 static struct {
@@ -143,8 +150,10 @@ static void handleNewSubShotType(MugenDefScriptGroup* tGroup) {
 	e->mHasSpeed = fetchMugenAssignmentFromGroupAndReturnWhetherItExists("speed", tGroup, &e->mSpeed);
 	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("rotation", tGroup, &e->mStartRotation, "");
 	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("rotationadd", tGroup, &e->mRotationAdd, "");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("color", tGroup, &e->mColor, "white");
+	fetchMugenAssignmentFromGroupAndReturnWhetherItExistsDefaultString("gimmick", tGroup, &e->mGimmick, "");
 
-	Position center = getMugenDefVectorOrDefaultAsGroup(tGroup, "center", makePosition(0,0,0));
+	Position center = getMugenDefVectorOrDefaultAsGroup(tGroup, "center", makePosition(0, 0, 0));
 	double radius = getMugenDefFloatVariableAsGroup(tGroup, "radius");
 	e->mColCirc = makeCollisionCirc(center, radius);
 	parseHomingType(e, tGroup);
@@ -168,13 +177,18 @@ static void loadShotHandler(void* tData) {
 	gData.mAnimations = loadMugenAnimationFile("assets/shots/SHOTS.air");
 
 	gData.mShotTypes = new_int_map();
-	
+	gData.mActiveShots = new_list();
+
 	MugenDefScript script = loadMugenDefScript("assets/shots/SHOTS.def");
 	loadShotTypesFromScript(&script);
 	unloadMugenDefScript(script);
 }
 
 static void unloadSubShot(ActiveSubShot* e) {
+	if (e->mHasGimmickData) {
+		freeMemory(e->mGimmickData);
+	}
+
 	removeMugenAnimation(e->mAnimationID);
 	removeFromCollisionHandler(e->mRoot->mCollisionData.mCollisionList, e->mCollisionID);
 	destroyCollider(&e->mCollider);
@@ -185,7 +199,7 @@ static Position getClosestEnemyPositionIncludingBoss(Position p) {
 	Position closest = getClosestEnemyPosition(p);
 
 	if (!isBossActive()) return closest;
-		
+
 	Position bPosition = getBossPosition();
 	if (getDistance2D(p, closest) < 1e-6 || getDistance2D(p, bPosition) < getDistance2D(p, closest)) {
 		return bPosition;
@@ -211,12 +225,16 @@ static void updateHoming(ActiveSubShot* e) {
 }
 
 static void updateRotation(ActiveSubShot* e) {
-	
+
 	SubShotType* subShot = e->mType;
 
 	double rotationAdd = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(subShot->mRotationAdd, NULL, 0);
 	e->mRotation += rotationAdd;
 	setMugenAnimationDrawAngle(e->mAnimationID, e->mRotation);
+}
+
+static void updateGimmick(ActiveSubShot* e) {
+	getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mType->mGimmick, e, 0);
 }
 
 static int updateSubShot(void* tCaller, void* tData) {
@@ -225,6 +243,7 @@ static int updateSubShot(void* tCaller, void* tData) {
 
 	updateRotation(e);
 	updateHoming(e);
+	updateGimmick(e);
 
 	Position p = *getHandledPhysicsPositionReference(e->mPhysicsID);
 	if (p.x < -100 || p.x > 740 || p.y < -100 || p.y > 480) {
@@ -240,7 +259,7 @@ static int updateShot(void* tCaller, void* tData) {
 	ActiveShot* e = tData;
 
 	list_remove_predicate(&e->mSubShots, updateSubShot, e);
-	
+
 	int hasNoShotsLeft = list_size(&e->mSubShots) == 0;
 	return hasNoShotsLeft;
 }
@@ -251,6 +270,7 @@ static void updateActiveShots() {
 
 static void updateShotHandler(void* tData) {
 	(void)tData;
+	if (isWrapperPaused()) return;
 	updateActiveShots();
 }
 
@@ -268,7 +288,7 @@ static void shotHitCB(void* tCaller, void* tCollisionData) {
 
 static Position getRandomEnemyOrBossPosition() {
 	Position p = getRandomEnemyPosition();
-	
+
 	if (!isBossActive()) {
 		if (p.x == INF) p = makePosition(randfrom(-100, 740), randfrom(-100, 580), 0);
 		return p;
@@ -276,7 +296,7 @@ static Position getRandomEnemyOrBossPosition() {
 
 	Position bossP = getBossPosition();
 	if (p.x == INF) return bossP;
-	
+
 	int amount = getEnemyAmount();
 	double probability = 1 / (amount + 1);
 	if (randfrom(0, 1) <= probability) return bossP;
@@ -320,6 +340,46 @@ void getShotAngleTowardsPlayer(char* tOutput, void* tCaller) {
 	sprintf(tOutput, "%f", angle);
 }
 
+static void setShotColor(SubShotType* subShot, ActiveSubShot* e, SubShotAssignmentParseCaller* caller) {
+	double r, g, b;
+
+	char* text = evaluateMugenAssignmentAndReturnAsAllocatedString(subShot->mColor, caller);
+
+	if (!strcmp("white", text)) {
+		r = g = b = 1;
+	}
+	else if (!strcmp("red", text)) {
+		r = 1;
+		b = g = 0;
+	}
+	else if (!strcmp("grey", text)) {
+		r = g = b = 0.5;
+	}
+	else if (!strcmp("yellow", text)) {
+		r = g = 1;
+		b = 0;
+	}
+	else if (!strcmp("rainbow", text)) {
+		r = randfromInteger(0, 1);
+		g = randfromInteger(0, 1);
+		b = randfromInteger(0, 1);
+		if (!r && !g && !b) r = 1;
+	}
+	else if (!strcmp("green", text)) {
+		r = 0;
+		g = 1;
+		b = 0;
+	}
+	else {
+		r = g = b = 1;
+		logError("Unrecognized color.");
+		logErrorString(text);
+		abortSystem();
+	}
+
+	setMugenAnimationColor(e->mAnimationID, r, g, b);
+}
+
 static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i) {
 	ActiveSubShot* e = allocMemory(sizeof(ActiveSubShot));
 	e->mType = subShot;
@@ -345,11 +405,10 @@ static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i)
 	if (subShot->mHasAngle) {
 		angle = evaluateMugenAssignmentAndReturnAsFloat(subShot->mAngle, &assignmentCaller);
 		velocity = getDirectionFromAngleZ(angle);
-		offset = vecRotateZ(offset, angle);
 
 		angle *= -1; // TODO: fix
 	}
-	
+
 	if (subShot->mHomingType == SHOT_TYPE_TARGET_RANDOM) {
 		Position p = vecAdd(caller->mPosition, offset);
 		Position enemyPos = getRandomEnemyOrBossPosition();
@@ -377,6 +436,10 @@ static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i)
 	e->mRotation = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(subShot->mStartRotation, &assignmentCaller, angle);
 	setMugenAnimationDrawAngle(e->mAnimationID, e->mRotation);
 
+	setShotColor(subShot, e, &assignmentCaller);
+
+	e->mHasGimmickData = 0;
+
 	e->mListID = list_push_back_owned(&caller->mRoot->mSubShots, e);
 }
 
@@ -389,8 +452,6 @@ static void addSubShot(void* tCaller, void* tData) {
 	for (i = 0; i < amount; i++) {
 		addSingleSubShot(caller, subShot, i);
 	}
-
-	
 }
 
 void addShot(int tID, int tCollisionList, Position tPosition)
@@ -399,6 +460,7 @@ void addShot(int tID, int tCollisionList, Position tPosition)
 	assert(int_map_contains(&gData.mShotTypes, tID));
 	e->mType = int_map_get(&gData.mShotTypes, tID);
 	e->mCollisionData.mCollisionList = tCollisionList;
+	e->mCollisionData.mIsItem = 0;
 	e->mSubShots = new_list();
 	list_push_back_owned(&gData.mActiveShots, e);
 
@@ -432,4 +494,77 @@ void removeEnemyShots()
 	RemoveShotsForSingleListCaller caller;
 	caller.mCollisionList = getEnemyShotCollisionList();
 	list_map(&gData.mActiveShots, removeShotTypeForSingleShot, &caller);
+}
+
+typedef struct {
+	Position mTarget;
+	int mState;
+} BigBangData;
+
+static void bangOut(BigBangData* data) {
+	int side = randfromInteger(0, 3);
+	if (side == 0) {
+		data->mTarget = makePosition(randfrom(0, 640), 0, 0);
+	}
+	else if (side == 1) {
+		data->mTarget = makePosition(randfrom(0, 640), 327, 0);
+	}
+	else if (side == 2) {
+		data->mTarget = makePosition(0, randfrom(0, 327), 0);
+	}
+	else {
+		data->mTarget = makePosition(0, randfrom(0, 327), 0);
+	}
+
+	data->mState = 0;
+}
+
+static void bangIn(BigBangData* data) {
+
+	data->mTarget = makePosition(320, 163, 0);
+	data->mState = 1;
+}
+
+static void loadBigBang(ActiveSubShot* e) {
+	e->mGimmickData = allocMemory(sizeof(BigBangData));
+	e->mHasGimmickData = 1;
+
+	BigBangData* data = e->mGimmickData;
+	bangOut(data);
+}
+
+void evaluateBigBangFunction(char * tDst, void * tCaller)
+{
+	ActiveSubShot* e = tCaller;
+
+	if (!e->mHasGimmickData) {
+		loadBigBang(e);
+	}
+	
+	BigBangData* data = e->mGimmickData;
+	Position pos = *getHandledPhysicsPositionReference(e->mPhysicsID);
+	Vector3D* vel = getHandledPhysicsVelocityReference(e->mPhysicsID);
+	
+	Vector3D delta = vecSub(data->mTarget, pos);
+	double l = vecLength(delta);
+	if (l < 2) {
+		if (data->mState) bangOut(data);
+		else bangIn(data);
+	}
+		
+	*vel = vecScale(vecNormalize(delta), 2);
+	
+	strcpy(tDst, "");
+}
+
+void evaluateBounceFunction(char * tDst, void * tCaller)
+{
+	ActiveSubShot* e = tCaller;
+	Position pos = *getHandledPhysicsPositionReference(e->mPhysicsID);
+	Velocity* vel = getHandledPhysicsVelocityReference(e->mPhysicsID);
+
+	if (pos.x < 0) vel->x = 1;
+	if (pos.x > 640) vel->x = -1;
+
+	strcpy(tDst, "");
 }

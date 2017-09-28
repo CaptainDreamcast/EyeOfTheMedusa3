@@ -1,0 +1,189 @@
+[Header]
+
+name = "P A R R O T"
+life = 2400
+startpos = 550, 180
+anim = 3000
+
+[Pattern]
+lifestart = 2400
+
+
+[Pattern]
+lifestart = 2300
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 100
+
+; ----------------ANIMATION
+[Action]
+time = 0
+type = changeanim
+value = 3001
+
+; ----------------SHOT
+
+[Action]
+time = 100
+timerepeated = 60
+type = shot
+shottype = 3001
+
+[Pattern]
+lifestart = 2100
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------ANIMATION
+[Action]
+time = 0
+type = changeanim
+value = 3002
+
+; ----------------SHOT
+
+[Action]
+time = 100
+timerepeated = 2
+type = shot
+shottype = 3003
+
+[Pattern]
+lifestart = 1800
+
+[Action]
+time = 0
+type = goto
+value = 320, 140
+speed = 3 
+
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------SHOT
+
+[Action]
+time = 100
+timerepeated = 4
+type = shot
+shottype = 3004
+
+[Action]
+time = 100
+timerepeated = 2
+type = shot
+shottype = 3005
+
+[Pattern]
+lifestart = 1500
+
+[Action]
+time = 0
+type = goto
+value = 550, 180
+speed = 1 
+
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------SHOT
+
+[Action]
+time = 100
+timerepeated = 120
+type = shot
+shottype = 3006
+
+[Pattern]
+lifestart = 900
+
+
+[Action]
+time = 0
+type = disableplayerhit
+
+[Action]
+time = 1
+type = changeanim
+value = 3003
+
+[Action]
+time = 1
+type = goto
+value = 320, 327/2
+speed = 10 
+
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------SHOT
+
+[Action]
+time = 100
+timerepeated = 120
+type = shot
+shottype = 3007
+
+[Pattern]
+lifestart = 600
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------SHOT
+
+[Action]
+time = 100
+timerepeated = 4
+type = shot
+shottype = 3008
+
+[Pattern]
+lifestart = 300
+
+[Action]
+time = 0
+type = goto
+value = 500, 327/2
+speed = 10 
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------SHOT
+
+[Action]
+time = 480
+timerepeated = 180
+type = setaidtextrandom
+
+[Action]
+time = 600
+timerepeated = 180
+type = shot
+shottype = 3009

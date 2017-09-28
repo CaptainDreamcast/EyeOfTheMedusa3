@@ -1,12 +1,12 @@
 [Header]
 
 name = "God"
-life = 1000
+life = 1600
 startpos = 550, 180
 anim = 2000
 
 [Pattern]
-lifestart = 1000
+lifestart = 1600
 
 ; ----------------SHOTS
 
@@ -21,3 +21,91 @@ time = 30
 timerepeated = 20
 type = shot
 shottype = 2002
+
+[Pattern]
+lifestart = 1300
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 100
+
+; ----------------SHOTS
+ 
+[Action]
+time = 30
+timerepeated = 20
+type = shot
+shottype = 2002
+
+
+[Action]
+time = 30
+timerepeated = 4
+type = shot
+shottype = 2003
+
+
+
+[Pattern]
+lifestart = 1000
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 100
+
+
+[Action]
+time = 0
+type = stagepartadvance
+
+; ----------------SHOTS
+ 
+[Action]
+time = 200
+timerepeated = 20
+type = shot
+shottype = 2002
+
+[Pattern]
+lifestart = 700
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 100
+
+; ----------------SHOTS
+ 
+[Action]
+time = 200
+timerepeated = 20
+type = shot
+shottype = 2004
+
+; ----------------GIMMICK
+[Action]
+time = 200
+timerepeated = 180
+type = fadewhite
+value = 180
+
+[Pattern]
+lifestart = 400
+
+; ----------------DROP
+[Action]
+time = 0
+type = smallpowerdrop
+value = 100
+
+; ----------------SHOTS
+ 
+[Action]
+time = 200
+type = shot
+shottype = 2005

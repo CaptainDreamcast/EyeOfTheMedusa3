@@ -9,7 +9,7 @@ static struct {
 	int mEnemyCollisionList;
 	int mEnemyShotCollisionList;
 
-	int mPowerItemCollisionList;
+	int mItemCollisionList;
 	int mPlayerItemCollisionList;
 
 } gData;
@@ -20,11 +20,12 @@ void loadCollisions()
 	gData.mPlayerShotCollisionList = addCollisionListToHandler();
 	gData.mEnemyCollisionList = addCollisionListToHandler();
 	gData.mEnemyShotCollisionList = addCollisionListToHandler();
-	gData.mPowerItemCollisionList = addCollisionListToHandler();
+	gData.mItemCollisionList = addCollisionListToHandler();
 	gData.mPlayerItemCollisionList = addCollisionListToHandler();
 
 	addCollisionHandlerCheck(gData.mPlayerCollisionList, gData.mEnemyShotCollisionList);
-	addCollisionHandlerCheck(gData.mPlayerItemCollisionList, gData.mPowerItemCollisionList);
+	addCollisionHandlerCheck(gData.mPlayerCollisionList, gData.mEnemyCollisionList);
+	addCollisionHandlerCheck(gData.mPlayerItemCollisionList, gData.mItemCollisionList);
 	addCollisionHandlerCheck(gData.mEnemyCollisionList, gData.mPlayerShotCollisionList);
 }
 
@@ -48,9 +49,9 @@ int getEnemyShotCollisionList()
 	return gData.mEnemyShotCollisionList;
 }
 
-int getPowerItemCollisionList()
+int getItemCollisionList()
 {
-	return gData.mPowerItemCollisionList;
+	return gData.mItemCollisionList;
 }
 
 int getPlayerItemCollisionList()

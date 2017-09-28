@@ -6,3 +6,5 @@
 extern ActorBlueprint ItemHandler;
 
 void addSmallPowerItems(Position tPosition, int tAmount);
+void addLifeItems(Position tPosition, int tAmount);
+void addBombItems(Position tPosition, int tAmount);

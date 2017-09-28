@@ -17,21 +17,23 @@
 #include "boss.h"
 #include "assignment.h"
 #include "itemhandler.h"
-
-static struct {
-	char mDefinitionPath[1024];
-} gData;
+#include "effecthandler.h"
+#include "continuehandler.h"
+#include "gameoptionhandler.h"
 
 static void loadGameScreen() {
 	instantiateActor(getMugenAnimationHandlerActorBlueprint());
 
 	loadGameAssignments();
 	loadCollisions();
+	instantiateActor(ContinueHandler);
+	instantiateActor(GameOptionHandler);
+	instantiateActor(EffectHandler);
 	instantiateActor(ItemHandler);
 	instantiateActor(EnemyHandler);
 	instantiateActor(BackgroundHandler);
-	instantiateActor(Player);
 	instantiateActor(UserInterface);
+	instantiateActor(Player);
 	instantiateActor(BanterHandler);
 	instantiateActor(ShotHandler);
 	instantiateActor(BossHandler);
@@ -53,8 +55,3 @@ Screen GameScreen = {
 	.mLoad = loadGameScreen,
 	.mUpdate = updateGameScreen,
 };
-
-void setLevel(int i)
-{
-	sprintf(gData.mDefinitionPath, "assets/stages/%d.def", i);
-}

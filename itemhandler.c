@@ -7,11 +7,6 @@
 
 #include "collision.h"
 
-typedef enum { 
-	ITEM_TYPE_SMALL_POWER,
-	ITEM_TYPE_BIG_POWER,
-}ItemType;
-
 typedef struct {
 	ItemType mType;
 
@@ -67,36 +62,52 @@ ActorBlueprint ItemHandler = {
 	.mUpdate = updateItemHandler,
 };
 
-static void powerItemHitCB(void* tCaller, void* tCollisionData) {
+static void itemHitCB(void* tCaller, void* tCollisionData) {
 	(void)tCollisionData;
-	printf("hit\n");
 	Item* e = tCaller;
 	unloadItem(e);
 	list_remove(&gData.mItems, e->mListID);
 }
 
-static void addSingleSmallPowerItem(Position tPosition) {
+static void addSingleItem(Position tPosition, ItemType tType, int tAnimationNumber) {
 	Item* e = allocMemory(sizeof(Item));
 
 	e->mPhysicsID = addToPhysicsHandler(tPosition);
 	addAccelerationToHandledPhysics(e->mPhysicsID, makePosition(-2, 0, 0));
-	MugenAnimation* animation = getMugenAnimation(&gData.mAnimations, 1);
-	e->mAnimationID = addMugenAnimation(animation, &gData.mSprites, makePosition(0,0,30));
+	MugenAnimation* animation = getMugenAnimation(&gData.mAnimations, tAnimationNumber);
+	e->mAnimationID = addMugenAnimation(animation, &gData.mSprites, makePosition(0, 0, 30));
 	setMugenAnimationBasePosition(e->mAnimationID, getHandledPhysicsPositionReference(e->mPhysicsID));
 
-	e->mCollisionData.mCollisionList = getPowerItemCollisionList();
-	setMugenAnimationCollisionActive(e->mAnimationID, getPowerItemCollisionList(), powerItemHitCB, e, &e->mCollisionData);
+	e->mCollisionData.mCollisionList = getItemCollisionList();
+	e->mCollisionData.mIsItem = 1;
+	e->mCollisionData.mItemType = tType;
+
+	setMugenAnimationCollisionActive(e->mAnimationID, getItemCollisionList(), itemHitCB, e, &e->mCollisionData);
 
 	e->mListID = list_push_back_owned(&gData.mItems, e);
 }
 
-void addSmallPowerItems(Position tPosition, int tAmount)
-{
+static void addItems(Position tPosition, int tAmount, ItemType tType, int tAnimationNumber) {
 	int i = 0;
 	for (i = 0; i < tAmount; i++) {
 		Position p = vecAdd(tPosition, makePosition(randfrom(-10, 10), randfrom(-10, 10), 0));
-		addSingleSmallPowerItem(p);
+		addSingleItem(p, tType, tAnimationNumber);
 	}
+}
+
+void addSmallPowerItems(Position tPosition, int tAmount)
+{
+	addItems(tPosition, tAmount, ITEM_TYPE_SMALL_POWER, 1);
+}
+
+void addLifeItems(Position tPosition, int tAmount)
+{
+	addItems(tPosition, tAmount, ITEM_TYPE_LIFE, 2);
+}
+
+void addBombItems(Position tPosition, int tAmount)
+{
+	addItems(tPosition, tAmount, ITEM_TYPE_BOMB, 3);
 }
 
 

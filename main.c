@@ -10,6 +10,8 @@
 #include <tari/logoscreen.h>
 
 #include "gamescreen.h"
+#include "level.h"
+#include "titlescreen.h"
 
 #ifdef DREAMCAST
 KOS_INIT_FLAGS(INIT_DEFAULT);
@@ -58,8 +60,7 @@ int main(int argc, char** argv) {
 
 	setMainFileSystem();
 	
-	setLevel(1);
-	setScreenAfterWrapperLogoScreen(&GameScreen);
+	setScreenAfterWrapperLogoScreen(&TitleScreen);
 	startScreenHandling(getLogoScreenFromWrapper());
 
 	exitGame();

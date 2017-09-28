@@ -5,8 +5,9 @@
 
 ; DOG_IDLE
 [Begin Action 2]
-Clsn2: 1
-  Clsn2[0] = -36, -22, 29, 23
+Clsn2: 2
+  Clsn2[0] = -38, -34, 6, 6
+  Clsn2[1] = -31, -18, 39, 34
 2,0, 0,0, 10
 
 [Begin Action 1000]

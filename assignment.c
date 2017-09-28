@@ -10,7 +10,7 @@
 #include "shothandler.h"
 #include "enemyhandler.h"
 #include "player.h"
-
+#include "level.h"
 
 static void fetchRandFromValue(char* tDst, void* tCaller, char* tIndex) {
 	(void)tCaller;
@@ -22,6 +22,24 @@ static void fetchRandFromValue(char* tDst, void* tCaller, char* tIndex) {
 	
 	double val = randfrom(a, b);
 	sprintf(tDst, "%f", val);
+}
+
+static void fetchRandFromIntegerValue(char* tDst, void* tCaller, char* tIndex) {
+	(void)tCaller;
+	int a, b;
+	char comma[20];
+	int items = sscanf(tIndex, "%d %s %d", &a, comma, &b);
+	assert(items == 3);
+	assert(!strcmp(",", comma));
+
+	int val = randfromInteger(a, b);
+	sprintf(tDst, "%d", val);
+}
+
+
+static void fetchIdentity(char* tDst, void* tCaller, char* tIndex) {
+	(void)tCaller;
+	sprintf(tDst, "%s", tIndex);
 }
 
 static void fetchPI(char* tDst, void* tCaller) {
@@ -45,6 +63,14 @@ void loadGameAssignments()
 	addMugenAssignmentVariable("cursubshot", getCurrentSubShotIndex);
 	addMugenAssignmentVariable("localdeathcount", getLocalDeathCountVariable);
 	addMugenAssignmentVariable("localbombcount", getLocalBombCountVariable);
+	addMugenAssignmentVariable("stageparttime", fetchStagePartTime);
+
+	addMugenAssignmentVariable("bigbang", evaluateBigBangFunction);
+	addMugenAssignmentVariable("bounce", evaluateBounceFunction); 
+	addMugenAssignmentVariable("textaid", evaluateTextAidFunction);
+
 	addMugenAssignmentArray("randfrom", fetchRandFromValue);
+	addMugenAssignmentArray("randfrominteger", fetchRandFromIntegerValue);
+	addMugenAssignmentArray("identity", fetchIdentity);
 	
 }

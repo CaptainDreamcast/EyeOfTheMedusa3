@@ -1,3 +1,4 @@
 OBJS = main.o \
 assignment.o banter.o bg.o boss.o collision.o enemyhandler.o \
-gamescreen.o itemhandler.o level.o player.o shothandler.o ui.o
+gamescreen.o itemhandler.o level.o player.o shothandler.o ui.o \
+effecthandler.o
