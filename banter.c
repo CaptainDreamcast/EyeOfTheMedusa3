@@ -136,8 +136,8 @@ static void setNewBanterStepActive() {
 	removeHandledText(gData.mSpeakerTextID);
 	removeHandledText(gData.mBanterTextID);
 	
-	gData.mSpeakerTextID = addHandledText(makePosition(152, 359, 85), step->mSpeaker, 0, COLOR_WHITE, makePosition(15, 15, 0), makePosition(-5, -5, 0), makePosition(INF, INF, 1), INF);
-	gData.mBanterTextID = addHandledTextWithBuildup(makePosition(150, 379, 85), step->mText, 0, COLOR_WHITE, makePosition(15, 15, 0), makePosition(-5, 0, 0), makePosition(180, 100, 1), INF, 1);
+	gData.mSpeakerTextID = addHandledText(makePosition(152, 359, 45), step->mSpeaker, 0, COLOR_WHITE, makePosition(15, 15, 0), makePosition(-5, -5, 0), makePosition(INF, INF, 1), INF);
+	gData.mBanterTextID = addHandledTextWithBuildup(makePosition(150, 379, 45), step->mText, 0, COLOR_WHITE, makePosition(15, 15, 0), makePosition(-5, 0, 0), makePosition(180, 100, 1), INF, 1);
 
 	gData.mBanterStepNow = 0;
 }
@@ -257,10 +257,10 @@ static void handleBanterHeader(MugenDefScriptGroup* tGroup) {
 
 static void initiateTextAndImage() {
 	gData.mAnimation = createOneFrameMugenAnimationForSprite(0, 0);
-	gData.mAnimationID = addMugenAnimation(gData.mAnimation, &gData.mSprites, makePosition(38, 354, 85));
+	gData.mAnimationID = addMugenAnimation(gData.mAnimation, &gData.mSprites, makePosition(38, 354, 45));
 	
-	gData.mSpeakerTextID = addHandledText(makePosition(152, 359, 85), "Kat:", 0, COLOR_WHITE, makePosition(15,15,0), makePosition(-5, -5, 0), makePosition(INF, INF, 1), INF);
-	gData.mBanterTextID = addHandledTextWithBuildup(makePosition(150, 379, 85), "You know it's not just a dog, right?", 0, COLOR_WHITE, makePosition(15, 15, 0), makePosition(-5, 0, 0), makePosition(180, 100, 1), INF, 1);
+	gData.mSpeakerTextID = addHandledText(makePosition(152, 359, 45), "Kat:", 0, COLOR_WHITE, makePosition(15,15,0), makePosition(-5, -5, 0), makePosition(INF, INF, 1), INF);
+	gData.mBanterTextID = addHandledTextWithBuildup(makePosition(150, 379, 45), "You know it's not just a dog, right?", 0, COLOR_WHITE, makePosition(15, 15, 0), makePosition(-5, 0, 0), makePosition(180, 100, 1), INF, 1);
 }
 
 void loadBanterFromScript(MugenDefScript * tScript)

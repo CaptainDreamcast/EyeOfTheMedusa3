@@ -286,7 +286,7 @@ static void bossHitCB(void* tCaller, void* tCollisionData) {
 void activateBoss() {
 	gData.mPhysicsID = addToPhysicsHandler(gData.mStartPosition);
 
-	gData.mAnimationID = addMugenAnimation(gData.mIdleAnimation, gData.mSprites, makePosition(0, 0, 20));
+	gData.mAnimationID = addMugenAnimation(gData.mIdleAnimation, gData.mSprites, makePosition(0, 0, 15));
 	setMugenAnimationBasePosition(gData.mAnimationID, getHandledPhysicsPositionReference(gData.mPhysicsID));
 	setMugenAnimationCollisionActive(gData.mAnimationID, getEnemyCollisionList(), bossHitCB, NULL, &gData.mCollisionData);
 

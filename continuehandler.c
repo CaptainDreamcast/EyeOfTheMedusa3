@@ -102,18 +102,18 @@ void setContinueActive()
 	pauseWrapper();
 	pauseMugenAnimationHandler();
 
-	gData.mBlackBackgroundID = playOneFrameAnimationLoop(makePosition(0, 0, 90), &gData.mWhiteTexture);
+	gData.mBlackBackgroundID = playOneFrameAnimationLoop(makePosition(0, 0, 50), &gData.mWhiteTexture);
 	setAnimationSize(gData.mBlackBackgroundID, makePosition(640, 480, 1), makePosition(0, 0, 0));
 	setAnimationTransparency(gData.mBlackBackgroundID, 0.7);
 	setAnimationColor(gData.mBlackBackgroundID, 0, 0, 0);
 
 	gData.mCountdownValueNow = 10;
-	gData.mCountdownAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, 11), &gData.mSprites, makePosition(320, 140, 91));
-	gData.mValueAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, gData.mCountdownValueNow), &gData.mSprites, makePosition(320, 240, 91));
+	gData.mCountdownAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, 11), &gData.mSprites, makePosition(320, 140, 55));
+	gData.mValueAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, gData.mCountdownValueNow), &gData.mSprites, makePosition(320, 240, 55));
 	
 	char text[1000];
 	sprintf(text, "CONTINUES LEFT: %d", getContinueAmount());
-	gData.mTextID = addHandledText(makePosition(200, 300, 91), text, 0, COLOR_WHITE, makePosition(20, 20, 1), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
+	gData.mTextID = addHandledText(makePosition(200, 300, 55), text, 0, COLOR_WHITE, makePosition(20, 20, 1), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
 
 	gData.mSecondCountNow = 0;
 

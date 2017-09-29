@@ -74,10 +74,10 @@ static void loadPlayer(void* tData) {
 	gData.mSprites = loadMugenSpriteFileWithoutPalette("assets/player/PLAYER.sff");
 	gData.mAnimations = loadMugenAnimationFile("assets/player/PLAYER.air");
 
-	gData.mPhysicsID = addToPhysicsHandler(makePosition(40, 200, 3));
+	gData.mPhysicsID = addToPhysicsHandler(makePosition(40, 200, 0));
 	setHandledPhysicsDragCoefficient(gData.mPhysicsID, makePosition(0.3, 0.3, 0));
 
-	gData.mAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, 1), &gData.mSprites, makePosition(0, 0, 0));
+	gData.mAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, 1), &gData.mSprites, makePosition(0, 0, 10));
 	setMugenAnimationBasePosition(gData.mAnimationID, getHandledPhysicsPositionReference(gData.mPhysicsID));
 
 	gData.mCollisionData.mCollisionList = getPlayerCollisionList();
@@ -88,7 +88,7 @@ static void loadPlayer(void* tData) {
 	gData.mItemCollisionID = addColliderToCollisionHandler(getPlayerItemCollisionList(), getHandledPhysicsPositionReference(gData.mPhysicsID), gData.mItemCollider, playerHitCB, NULL, &gData.mCollisionData);
 	
 	gData.mHitboxTexture = loadTexture("assets/debug/collision_circ.pkg");
-	gData.mHitBoxAnimationID = playOneFrameAnimationLoop(makePosition(-8, -8, 1), &gData.mHitboxTexture);
+	gData.mHitBoxAnimationID = playOneFrameAnimationLoop(makePosition(-8, -8, 35), &gData.mHitboxTexture);
 	setAnimationBasePositionReference(gData.mHitBoxAnimationID, getHandledPhysicsPositionReference(gData.mPhysicsID));
 	setAnimationSize(gData.mHitBoxAnimationID, makePosition(10, 10, 0), makePosition(8, 8, 0));
 	setAnimationTransparency(gData.mHitBoxAnimationID, 0);

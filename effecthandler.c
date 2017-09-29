@@ -20,7 +20,7 @@ ActorBlueprint EffectHandler = {
 
 void addExplosionEffect(Position tPosition)
 {
-	tPosition = vecAdd(tPosition, makePosition(0, 0, 1));
+	tPosition = vecAdd(tPosition, makePosition(0, 0, 20));
 	MugenAnimation* animation = getMugenAnimation(&gData.mAnimations, 2);
 	int id = addMugenAnimation(animation, &gData.mSprites, tPosition);
 	setMugenAnimationNoLoop(id);

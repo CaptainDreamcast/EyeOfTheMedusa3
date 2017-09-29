@@ -86,15 +86,15 @@ static void setOptionsActive() {
 	pauseWrapper();
 	pauseMugenAnimationHandler();
 	
-	gData.mBlackBGAnimationID = playOneFrameAnimationLoop(makePosition(0, 0, 90), &gData.mWhiteTexture);
+	gData.mBlackBGAnimationID = playOneFrameAnimationLoop(makePosition(0, 0, 50), &gData.mWhiteTexture);
 	setAnimationSize(gData.mBlackBGAnimationID, makePosition(640, 480, 1), makePosition(0, 0, 0));
 	setAnimationTransparency(gData.mBlackBGAnimationID, 0.7);
 	setAnimationColor(gData.mBlackBGAnimationID, 0, 0, 0);
 
-	gData.mPauseTextID = addHandledText(makePosition(200, 100, 91), "PAUSE", 0, COLOR_WHITE, makePosition(40, 40, 1), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
-	gData.mResumeOptionID = addOption(makePosition(120, 160, 91), "RESUME SAVING THE UNIVERSE", pickResumeOption, NULL);
-	gData.mRetryOptionID = addOption(makePosition(120, 190, 91), "RETRY FROM FIRST STAGE", pickRetryOption, NULL);
-	gData.mExitOptionID = addOption(makePosition(120, 220, 91), "EXIT TO TITLE SCREEN", pickExitOption, NULL);
+	gData.mPauseTextID = addHandledText(makePosition(200, 100, 55), "PAUSE", 0, COLOR_WHITE, makePosition(40, 40, 1), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
+	gData.mResumeOptionID = addOption(makePosition(120, 160, 55), "RESUME SAVING THE UNIVERSE", pickResumeOption, NULL);
+	gData.mRetryOptionID = addOption(makePosition(120, 190, 55), "RETRY FROM FIRST STAGE", pickRetryOption, NULL);
+	gData.mExitOptionID = addOption(makePosition(120, 220, 55), "EXIT TO TITLE SCREEN", pickExitOption, NULL);
 
 	gData.mIsActive = 1;
 }

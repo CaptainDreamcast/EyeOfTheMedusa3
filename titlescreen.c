@@ -22,7 +22,7 @@ static void loadTitleScreen() {
 	gData.mSprites = loadMugenSpriteFileWithoutPalette("assets/title/TITLE.sff");
 	 
 	gData.mTitleAnimation = createOneFrameMugenAnimationForSprite(1, 0);
-	gData.mTitleAnimationID = addMugenAnimation(gData.mTitleAnimation, &gData.mSprites, makePosition(0, 0, 1));
+	gData.mTitleAnimationID = addMugenAnimation(gData.mTitleAnimation, &gData.mSprites, makePosition(0, 0, 10));
 
 	instantiateActor(BackgroundHandler);
 	setBackground("assets/title/BG.def", &gData.mSprites);

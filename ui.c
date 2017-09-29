@@ -21,11 +21,11 @@ static void loadUserInterface(void* tData) {
 	gData.mSprites = loadMugenSpriteFileWithoutPalette("assets/ui/UI.sff");
 	gData.mAnimation = createOneFrameMugenAnimationForSprite(0, 0);
 
-	gData.mAnimationID = addMugenAnimation(gData.mAnimation, &gData.mSprites, makePosition(0, 327, 80));
+	gData.mAnimationID = addMugenAnimation(gData.mAnimation, &gData.mSprites, makePosition(0, 327, 40));
 
-	gData.mLifeAmountTextID = addHandledText(makePosition(540, 350, 81), "0", 0, COLOR_WHITE, makePosition(30, 30, 30), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
-	gData.mBombAmountTextID = addHandledText(makePosition(540, 387, 81), "0", 0, COLOR_WHITE, makePosition(30, 30, 30), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
-	gData.mPowerTextID = addHandledText(makePosition(480, 420, 81), "0.00", 0, COLOR_WHITE, makePosition(30,30,30), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
+	gData.mLifeAmountTextID = addHandledText(makePosition(540, 350, 45), "0", 0, COLOR_WHITE, makePosition(30, 30, 30), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
+	gData.mBombAmountTextID = addHandledText(makePosition(540, 387, 45), "0", 0, COLOR_WHITE, makePosition(30, 30, 30), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
+	gData.mPowerTextID = addHandledText(makePosition(480, 420, 45), "0.00", 0, COLOR_WHITE, makePosition(30,30,30), makePosition(-5, -5, 0), makePosition(INF, INF, INF), INF);
 }
 
 ActorBlueprint UserInterface = {

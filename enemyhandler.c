@@ -178,7 +178,7 @@ static void addSingleEnemy(StageEnemy* tEnemy, int i) {
 
 	e->mWaitDuration = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(tEnemy->mWaitDuration, &caller, 120);
 
-	e->mAnimationID = addMugenAnimation(getMugenAnimation(gData.mEnemyAnimations, getEnemyTypeIdleAnimation(e->mType)), gData.mEnemySprites, makePosition(0, 0, 50));
+	e->mAnimationID = addMugenAnimation(getMugenAnimation(gData.mEnemyAnimations, getEnemyTypeIdleAnimation(e->mType)), gData.mEnemySprites, makePosition(0, 0, 15));
 	setMugenAnimationBasePosition(e->mAnimationID, getHandledPhysicsPositionReference(e->mPhysicsID));
 	e->mCollisionData.mCollisionList = getEnemyCollisionList();
 	e->mCollisionData.mIsItem = 0;

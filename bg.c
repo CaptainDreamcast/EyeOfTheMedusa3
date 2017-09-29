@@ -33,7 +33,7 @@ static void loadBackgroundHandler(void* tData) {
 	gData.mElements = new_vector();
 
 	gData.mWhiteTexture = loadTexture("$/rd/effects/white.pkg");
-	gData.mBlackAnimationID = playOneFrameAnimationLoop(makePosition(0, 0, 1), &gData.mWhiteTexture);
+	gData.mBlackAnimationID = playOneFrameAnimationLoop(makePosition(0, 0, 2), &gData.mWhiteTexture);
 	setAnimationSize(gData.mBlackAnimationID, makePosition(640, 480, 1), makePosition(0, 0, 0));
 	setAnimationColor(gData.mBlackAnimationID, 0, 0, 0);
 }
@@ -61,7 +61,7 @@ static void handleBackgroundElement(MugenDefScriptGroup* tGroup) {
 	e->mPosition = e->mOffset;
 	Vector3DI sprite = getMugenDefVectorIVariableAsGroup(tGroup, "sprite");
 	e->mAnimation = createOneFrameMugenAnimationForSprite(sprite.x, sprite.y);
-	e->mAnimationID = addMugenAnimation(e->mAnimation, gData.mSprites, makePosition(0, 0, 0));
+	e->mAnimationID = addMugenAnimation(e->mAnimation, gData.mSprites, makePosition(0, 0, 5));
 	setMugenAnimationBasePosition(e->mAnimationID, &e->mPosition);
 
 	vector_push_back_owned(&gData.mElements, e);

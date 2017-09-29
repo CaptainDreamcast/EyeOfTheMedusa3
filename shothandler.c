@@ -56,13 +56,14 @@ typedef struct {
 
 typedef struct {
 	int mID;
-	List mSubShots;
+	IntMap mSubShots;
 } ShotType;
 
 
 typedef struct {
 	ShotType* mType;
-	List mSubShots;
+	IntMap mSubShots;
+	int mSubShotsLeft;
 
 	CollisionData mCollisionData;
 } ActiveShot;
@@ -92,7 +93,7 @@ static struct {
 
 	IntMap mShotTypes;
 
-	List mActiveShots;
+	IntMap mActiveShots;
 } gData;
 
 static ShotType* gActiveShotType;
@@ -104,7 +105,7 @@ static int isShotType(MugenDefScriptGroup* tGroup) {
 static void handleNewShotType(MugenDefScriptGroup* tGroup) {
 	ShotType* e = allocMemory(sizeof(ShotType));
 	e->mID = getMugenDefNumberVariableAsGroup(tGroup, "id");
-	e->mSubShots = new_list();
+	e->mSubShots = new_int_map();
 
 	int_map_push_owned(&gData.mShotTypes, e->mID, e);
 
@@ -158,7 +159,7 @@ static void handleNewSubShotType(MugenDefScriptGroup* tGroup) {
 	e->mColCirc = makeCollisionCirc(center, radius);
 	parseHomingType(e, tGroup);
 
-	list_push_back_owned(&gActiveShotType->mSubShots, e);
+	int_map_push_back_owned(&gActiveShotType->mSubShots, e);
 }
 
 static void loadShotTypesFromScript(MugenDefScript* tScript) {
@@ -177,7 +178,7 @@ static void loadShotHandler(void* tData) {
 	gData.mAnimations = loadMugenAnimationFile("assets/shots/SHOTS.air");
 
 	gData.mShotTypes = new_int_map();
-	gData.mActiveShots = new_list();
+	gData.mActiveShots = new_int_map();
 
 	MugenDefScript script = loadMugenDefScript("assets/shots/SHOTS.def");
 	loadShotTypesFromScript(&script);
@@ -193,6 +194,7 @@ static void unloadSubShot(ActiveSubShot* e) {
 	removeFromCollisionHandler(e->mRoot->mCollisionData.mCollisionList, e->mCollisionID);
 	destroyCollider(&e->mCollider);
 	removeFromPhysicsHandler(e->mPhysicsID);
+	e->mRoot->mSubShotsLeft--;
 }
 
 static Position getClosestEnemyPositionIncludingBoss(Position p) {
@@ -258,14 +260,14 @@ static int updateShot(void* tCaller, void* tData) {
 	(void)tCaller;
 	ActiveShot* e = tData;
 
-	list_remove_predicate(&e->mSubShots, updateSubShot, e);
+	int_map_remove_predicate(&e->mSubShots, updateSubShot, e);
 
-	int hasNoShotsLeft = list_size(&e->mSubShots) == 0;
+	int hasNoShotsLeft = e->mSubShotsLeft == 0;
 	return hasNoShotsLeft;
 }
 
 static void updateActiveShots() {
-	list_remove_predicate(&gData.mActiveShots, updateShot, NULL);
+	int_map_remove_predicate(&gData.mActiveShots, updateShot, NULL);
 }
 
 static void updateShotHandler(void* tData) {
@@ -282,8 +284,8 @@ ActorBlueprint ShotHandler = {
 static void shotHitCB(void* tCaller, void* tCollisionData) {
 	(void)tCollisionData;
 	ActiveSubShot* e = tCaller;
-	unloadSubShot(e); // TODO
-	list_remove(&e->mRoot->mSubShots, e->mListID);
+	unloadSubShot(e); 
+	int_map_remove(&e->mRoot->mSubShots, e->mListID);
 }
 
 static Position getRandomEnemyOrBossPosition() {
@@ -430,7 +432,10 @@ static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i)
 	e->mCollider = makeColliderFromCirc(subShot->mColCirc);
 	e->mCollisionID = addColliderToCollisionHandler(caller->mRoot->mCollisionData.mCollisionList, getHandledPhysicsPositionReference(e->mPhysicsID), e->mCollider, shotHitCB, e, &caller->mRoot->mCollisionData);
 
-	e->mAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, subShot->mIdleAnimation), &gData.mSprites, makePosition(0, 0, 10));
+	double z;
+	if(caller->mRoot->mCollisionData.mCollisionList == getEnemyShotCollisionList()) z = 30;
+	else z = 25;
+	e->mAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, subShot->mIdleAnimation), &gData.mSprites, makePosition(0, 0, z));
 	setMugenAnimationBasePosition(e->mAnimationID, getHandledPhysicsPositionReference(e->mPhysicsID));
 
 	e->mRotation = getMugenAssignmentAsFloatValueOrDefaultWhenEmpty(subShot->mStartRotation, &assignmentCaller, angle);
@@ -440,7 +445,8 @@ static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i)
 
 	e->mHasGimmickData = 0;
 
-	e->mListID = list_push_back_owned(&caller->mRoot->mSubShots, e);
+	caller->mRoot->mSubShotsLeft++;
+	e->mListID = int_map_push_back_owned(&caller->mRoot->mSubShots, e);
 }
 
 static void addSubShot(void* tCaller, void* tData) {
@@ -461,13 +467,14 @@ void addShot(int tID, int tCollisionList, Position tPosition)
 	e->mType = int_map_get(&gData.mShotTypes, tID);
 	e->mCollisionData.mCollisionList = tCollisionList;
 	e->mCollisionData.mIsItem = 0;
-	e->mSubShots = new_list();
-	list_push_back_owned(&gData.mActiveShots, e);
+	e->mSubShotsLeft = 0;
+	e->mSubShots = new_int_map();
+	int_map_push_back_owned(&gData.mActiveShots, e);
 
 	SubShotCaller caller;
 	caller.mRoot = e;
 	caller.mPosition = tPosition;
-	list_map(&e->mType->mSubShots, addSubShot, &caller);
+	int_map_map(&e->mType->mSubShots, addSubShot, &caller);
 }
 
 typedef struct {
@@ -486,14 +493,14 @@ static void removeShotTypeForSingleShot(void* tCaller, void* tData) {
 	RemoveShotsForSingleListCaller* caller = tCaller;
 	if (caller->mCollisionList != e->mCollisionData.mCollisionList) return;
 
-	list_remove_predicate(&e->mSubShots, removeShotTypeForSingleSubShot, NULL);
+	int_map_remove_predicate(&e->mSubShots, removeShotTypeForSingleSubShot, NULL);
 }
 
 void removeEnemyShots()
 {
 	RemoveShotsForSingleListCaller caller;
 	caller.mCollisionList = getEnemyShotCollisionList();
-	list_map(&gData.mActiveShots, removeShotTypeForSingleShot, &caller);
+	int_map_map(&gData.mActiveShots, removeShotTypeForSingleShot, &caller);
 }
 
 typedef struct {
