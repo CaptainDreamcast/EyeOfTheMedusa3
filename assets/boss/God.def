@@ -2,11 +2,17 @@
 
 name = "God"
 life = 1600
-startpos = 550, 180
+startpos = 700, 180
 anim = 2000
 
 [Pattern]
 lifestart = 1600
+
+[Action]
+time = 0
+type = goto
+value = 550,180
+speed = 7
 
 ; ----------------SHOTS
 

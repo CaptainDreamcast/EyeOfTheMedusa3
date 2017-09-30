@@ -1,0 +1,115 @@
+[Header]
+Sprites = assets/story/GOOD.sff
+
+
+[STORYSTART]
+
+[Image 1]
+Group = 1
+Item = 0
+
+[Text 1]
+Speaker = ""
+Text = "One year has passed since Kat and Toucan defeated Dark Falz."
+
+[Text 1]
+Speaker = ""
+Text = "Not only did stars stop disappearing from the universe, but the stars that had already disappeared came back as well."
+
+[Image 1]
+Group = 1
+Item = 1
+
+[Text 1]
+Speaker = ""
+Text = "Humanity recovered from the shock of losing their two strongest weapons, the Parrot and the Toucan."
+
+[Text 1]
+Speaker = ""
+Text = "Earth joined the United SPACE Nations and now actively partakes in improving the universe for everybody."
+
+[Image 1]
+Group = 1
+Item = 2
+
+[Text 1]
+Speaker = ""
+Text = "General Bark and the Commander quit the military to pursue their dream career of becoming a manga artist/writer duo."
+
+[Text 1]
+Speaker = ""
+Text = "Their first published work, 'Catgirl loves Dogboy', broke the all-time space sales record."
+
+[Image 1]
+Group = 1
+Item = 3
+
+[Text 1]
+Speaker = ""
+Text = "God and the Universe's guardian buddied up and went to Space Woodstock together."
+
+[Text 1]
+Speaker = ""
+Text = "Rumour has it God went so wild, reality itself was on the verge of breaking."
+
+[Text 1]
+Speaker = ""
+Text = "Also, Archangel Michael was fired and replaced by Space Jimi Hendrix."
+
+[Image 1]
+Group = 1
+Item = 4
+
+[Text 1]
+Speaker = ""
+Text = "Nobody ever realized it was Kat and Toucan that saved the universe."
+
+[Text 1]
+Speaker = ""
+Text = "These days, the two are known as Algol's hottest Manzai duo."
+
+[Text 1]
+Speaker = "Toucan:"
+Text = "... An ambulance?"
+
+[Text 1]
+Speaker = "Kat:"
+Text = "THAT'S JUST WRONG!"
+
+[Text 1]
+Speaker = ""
+Text = "Their performances for the next three light years are already sold out."
+
+[Image 1]
+Group = 1
+Item = 0
+
+[Text 1]
+Speaker = ""
+Text = "Finally, the player."
+
+[Text 1]
+Speaker = ""
+Text = "Having completed Eye of the Medusa, they will never have another problem 1CC'ing a bullet hell shooter again."
+
+[Text 1]
+Speaker = "Ending #1"
+Text = "Thanks for playing, bullet hell god!"
+
+[Image 1]
+Group = 1
+Item = 5
+
+[Text 1]
+Speaker = ""
+Text = ""
+
+[Image 1]
+Group = 1
+Item = 6
+
+[Text 1]
+Speaker = ""
+Text = ""
+
+[Ending]

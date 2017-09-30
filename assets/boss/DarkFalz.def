@@ -1,0 +1,279 @@
+[Header]
+
+name = "DARK FALZ"
+life = 3000
+startpos = 900, 180
+anim = 4000
+
+[Pattern]
+lifestart = 3000
+
+[Action]
+time = 0
+type = goto
+value = 550,180
+speed = 7
+
+; ----------------SHOTS
+
+[Action]
+time = 100
+timerepeated = 5
+type = shot
+shottype = 4001
+
+[Pattern]
+lifestart = 2700
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4001
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+[Action]
+time = 0
+type = lifedrop
+value = 1
+
+; ----------------SHOTS
+ 
+[Action]
+time = 30
+timerepeated = 5
+type = shot
+shottype = 4002
+
+
+[Pattern]
+lifestart = 2400
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4002
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+[Action]
+time = 0
+type = bombdrop
+value = 1
+
+; ----------------SHOTS
+
+[Action]
+time = 100
+timerepeated = 4
+type = shot
+shottype = 4003
+
+[Pattern]
+lifestart = 2100
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4003
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------SHOTS
+
+[Action]
+time = 100
+timerepeated = 5
+type = shot
+shottype = 4004
+
+[Action]
+time = 100
+timerepeated = 60
+type = shot
+shottype = 4005
+
+[Pattern]
+lifestart = 1800
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4004
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------SHOTS
+
+[Action]
+time = 100
+timerepeated = 5
+type = shot
+shottype = 4006
+
+[Action]
+time = 100
+timerepeated = 60
+type = shot
+shottype = 4007
+
+[Pattern]
+lifestart = 1500
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4005
+
+[Action]
+time = 0
+type = bombdrop
+value = 1
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------MOVEMENT
+[Action]
+time = 100
+timerepeated = 10
+type = goto
+value = randfrom(400,640),randfrom(0,327)
+speed = 10
+
+; ----------------SHOTS
+
+[Action]
+time = 100
+timerepeated = 5
+type = shot
+shottype = 4008
+
+
+[Pattern]
+lifestart = 1200
+
+[Action]
+time = 0
+type = lifedrop
+value = 1
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4006
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------MOVEMENT
+[Action]
+time = 0
+type = goto
+value = 550,180
+speed = 10
+
+[Action]
+time = 0
+timerepeated = 1
+type = addrotation
+value = 0.8
+
+; ----------------SHOTS
+
+[Action]
+time = 100
+timerepeated = 5
+type = shot
+shottype = 4009
+
+[Pattern]
+lifestart = 900
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4007
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------MOVEMENT
+
+[Action]
+time = 0
+type = setrotation
+value = 0
+
+; ----------------SHOTS
+
+[Action]
+time = 100
+timerepeated = 11
+type = shot
+shottype = 4010
+
+[Pattern]
+lifestart = 600
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4008
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+; ----------------SHOTS
+
+[Action]
+time = 100
+timerepeated = 60
+type = shot
+shottype = 4011
+
+[Pattern]
+lifestart = 300
+
+; ----------------DROP
+[Action]
+time = 0
+type = changeanim
+value = 4009
+
+[Action]
+time = 0
+type = smallpowerdrop
+value = 200
+
+[Action]
+time = 0
+type = setfinalboss

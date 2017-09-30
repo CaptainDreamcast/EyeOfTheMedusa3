@@ -2,10 +2,14 @@
 
 #include <tari/actorhandler.h>
 #include <tari/geometry.h>
+#include <tari/physics.h>
 
 extern ActorBlueprint Player;
 
 Position getPlayerPosition();
+PhysicsObject* getPlayerPhysics();
+double getPlayerAcceleration();
+double getPlayerSpeed();
 
 void resetPlayerState();
 void resetLocalPlayerCounts();

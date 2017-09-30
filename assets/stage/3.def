@@ -10,12 +10,6 @@ id = 3
 anim = 2
 deathanim = 3
 
-[Boss]
-Time = 200
-
-[Break] ; TODO: remove
-Time = 100000
-
 [Enemy]
 amount = 3
 Time = 100

@@ -129,7 +129,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\assignment.c" />
-    <ClCompile Include="..\banter.c" />
     <ClCompile Include="..\bg.c" />
     <ClCompile Include="..\boss.c" />
     <ClCompile Include="..\collision.c" />
@@ -137,18 +136,19 @@
     <ClCompile Include="..\effecthandler.c" />
     <ClCompile Include="..\enemyhandler.c" />
     <ClCompile Include="..\gameoptionhandler.c" />
+    <ClCompile Include="..\gameoverscreen.c" />
     <ClCompile Include="..\gamescreen.c" />
     <ClCompile Include="..\itemhandler.c" />
     <ClCompile Include="..\level.c" />
     <ClCompile Include="..\main.c" />
     <ClCompile Include="..\player.c" />
     <ClCompile Include="..\shothandler.c" />
+    <ClCompile Include="..\storyscreen.c" />
     <ClCompile Include="..\titlescreen.c" />
     <ClCompile Include="..\ui.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\assignment.h" />
-    <ClInclude Include="..\banter.h" />
     <ClInclude Include="..\bg.h" />
     <ClInclude Include="..\boss.h" />
     <ClInclude Include="..\collision.h" />
@@ -156,11 +156,13 @@
     <ClInclude Include="..\effecthandler.h" />
     <ClInclude Include="..\enemyhandler.h" />
     <ClInclude Include="..\gameoptionhandler.h" />
+    <ClInclude Include="..\gameoverscreen.h" />
     <ClInclude Include="..\gamescreen.h" />
     <ClInclude Include="..\itemhandler.h" />
     <ClInclude Include="..\level.h" />
     <ClInclude Include="..\player.h" />
     <ClInclude Include="..\shothandler.h" />
+    <ClInclude Include="..\storyscreen.h" />
     <ClInclude Include="..\titlescreen.h" />
     <ClInclude Include="..\ui.h" />
     <ClInclude Include="resource.h" />

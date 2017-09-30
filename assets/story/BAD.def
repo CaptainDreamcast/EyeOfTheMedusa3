@@ -1,0 +1,47 @@
+[Header]
+Sprites = assets/story/BAD.sff
+
+
+[STORYSTART]
+
+[Image 1]
+Group = 1
+Item = 0
+
+[Text 1]
+Speaker = ""
+Text = "Despite Toucan's and Kat's best efforts, stars keep disappearing in the universe."
+
+[Text 1]
+Speaker = ""
+Text = "Did they do something wrong? What could they have done different?"
+
+[Image 1]
+Group = 1
+Item = 1
+
+[Text 1]
+Speaker = "Toucan:"
+Text = "'Did they do something wrong? What could they have done different?', that's what the ending text said."
+
+[Text 1]
+Speaker = "Kat:"
+Text = "STOP BREAKING THE FOURTH WALL!"
+
+[Text 1]
+Speaker = "Kat:"
+Text = "It can't be helped, we'll have to go again."
+
+[Text 1]
+Speaker = ""
+Text = "Thus the unlikely duo sets out again to save the universe and all its inhabitants."
+
+[Image 1]
+Group = 1
+Item = 0
+
+[Text 1]
+Speaker = "Ending #2"
+Text = "Try not to use any continues next time!"
+
+[Ending]

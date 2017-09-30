@@ -33,7 +33,7 @@ static void loadBackgroundHandler(void* tData) {
 	gData.mElements = new_vector();
 
 	gData.mWhiteTexture = loadTexture("$/rd/effects/white.pkg");
-	gData.mBlackAnimationID = playOneFrameAnimationLoop(makePosition(0, 0, 2), &gData.mWhiteTexture);
+	gData.mBlackAnimationID = playOneFrameAnimationLoop(makePosition(0, 0, 6), &gData.mWhiteTexture);
 	setAnimationSize(gData.mBlackAnimationID, makePosition(640, 480, 1), makePosition(0, 0, 0));
 	setAnimationColor(gData.mBlackAnimationID, 0, 0, 0);
 }

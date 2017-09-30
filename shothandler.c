@@ -22,7 +22,9 @@
 typedef enum {
 	SHOT_TYPE_NORMAL,
 	SHOT_TYPE_HOMING,
+	SHOT_TYPE_HOMING_FINAL,
 	SHOT_TYPE_TARGET_RANDOM,
+	SHOT_TYPE_TARGET_RANDOM_FINAL,
 } ShotHomingType;
 
 typedef struct {
@@ -85,6 +87,8 @@ typedef struct {
 
 	int mHasGimmickData;
 	void* mGimmickData;
+
+	int mIsStillActive;
 } ActiveSubShot;
 
 static struct {
@@ -125,8 +129,14 @@ static void parseHomingType(SubShotType* e, MugenDefScriptGroup* tGroup) {
 	else if (!strcmp("homing", text)) {
 		e->mHomingType = SHOT_TYPE_HOMING;
 	}
+	else if (!strcmp("homing_final", text)) {
+		e->mHomingType = SHOT_TYPE_HOMING_FINAL;
+	}
 	else if (!strcmp("targetrandom", text)) {
 		e->mHomingType = SHOT_TYPE_TARGET_RANDOM;
+	}
+	else if (!strcmp("targetrandom_final", text)) {
+		e->mHomingType = SHOT_TYPE_TARGET_RANDOM_FINAL;
 	}
 	else {
 		logError("Unrecognized type");
@@ -226,6 +236,21 @@ static void updateHoming(ActiveSubShot* e) {
 	*vel = dir;
 }
 
+static void updateFinalHoming(ActiveSubShot* e) {
+	if (e->mType->mHomingType != SHOT_TYPE_HOMING_FINAL) return;
+	Position p = *getHandledPhysicsPositionReference(e->mPhysicsID);
+	Position closestEnemy = getPlayerPosition();
+
+	Velocity* vel = getHandledPhysicsVelocityReference(e->mPhysicsID);
+	Vector3D dir = vecScale(vecNormalize(vecSub(closestEnemy, p)), vecLength(*vel));
+	dir.z = 0;
+	if (vecLength(dir) < 1e-6) return;
+
+	double angle = getAngleFromDirection(dir);
+	setMugenAnimationDrawAngle(e->mAnimationID, angle);
+	*vel = dir;
+}
+
 static void updateRotation(ActiveSubShot* e) {
 
 	SubShotType* subShot = e->mType;
@@ -245,15 +270,28 @@ static int updateSubShot(void* tCaller, void* tData) {
 
 	updateRotation(e);
 	updateHoming(e);
+	updateFinalHoming(e);
 	updateGimmick(e);
 
 	Position p = *getHandledPhysicsPositionReference(e->mPhysicsID);
-	if (p.x < -100 || p.x > 740 || p.y < -100 || p.y > 480) {
+	if (!e->mIsStillActive || p.x < -100 || p.x > 740 || p.y < -100 || p.y > 480) {
 		unloadSubShot(e);
 		return 1;
 	}
 
 	return 0;
+}
+
+static int unloadSubShotCB(void* tCaller, void* tData) {
+	(void)tCaller;
+	ActiveSubShot* e = tData;
+	unloadSubShot(e);
+	return 1;
+}
+
+static void unloadShot(ActiveShot* e) {
+	int_map_remove_predicate(&e->mSubShots, unloadSubShotCB, NULL);
+	delete_int_map(&e->mSubShots);
 }
 
 static int updateShot(void* tCaller, void* tData) {
@@ -262,8 +300,12 @@ static int updateShot(void* tCaller, void* tData) {
 
 	int_map_remove_predicate(&e->mSubShots, updateSubShot, e);
 
-	int hasNoShotsLeft = e->mSubShotsLeft == 0;
-	return hasNoShotsLeft;
+	if (!e->mSubShotsLeft) {
+		unloadShot(e);
+		return 1;
+	}
+
+	return 0;
 }
 
 static void updateActiveShots() {
@@ -400,34 +442,42 @@ static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i)
 		caller->mPosition = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(subShot->mAbsolutePosition, &assignmentCaller, makePosition(0, 0, 0));
 	}
 
+	double angle = 0;
 	if (subShot->mHasVelocity) {
 		velocity = getMugenAssignmentAsVector3DValueOrDefaultWhenEmpty(subShot->mVelocity, &assignmentCaller, makePosition(0, 0, 0));
+		angle = getAngleFromDirection(velocity);
 	}
-	double angle = 0;
+	
 	if (subShot->mHasAngle) {
 		angle = evaluateMugenAssignmentAndReturnAsFloat(subShot->mAngle, &assignmentCaller);
-		velocity = getDirectionFromAngleZ(angle);
-
+		velocity = getDirectionFromAngleZ(angle);	
 		angle *= -1; // TODO: fix
 	}
 
-	if (subShot->mHomingType == SHOT_TYPE_TARGET_RANDOM) {
+	if (subShot->mHomingType == SHOT_TYPE_TARGET_RANDOM || subShot->mHomingType == SHOT_TYPE_TARGET_RANDOM_FINAL) {
 		Position p = vecAdd(caller->mPosition, offset);
-		Position enemyPos = getRandomEnemyOrBossPosition();
+		Position enemyPos;
+		if (subShot->mHomingType == SHOT_TYPE_TARGET_RANDOM) {
+			enemyPos = getRandomEnemyOrBossPosition();
+		}
+		else {
+			enemyPos = getPlayerPosition();
+		}
+		
 		swap(&enemyPos.x, &p.x);
-		double angle = getAngleFromDirection(vecSub(enemyPos, p));
+		angle = getAngleFromDirection(vecSub(enemyPos, p));
 		velocity = getDirectionFromAngleZ(angle);
-		offset = vecRotateZ(offset, angle);
+		//offset = vecRotateZ(offset, angle);
+		angle *= -1; // TODO: fix
 	}
-
+	
 	if (subShot->mHasSpeed) {
 		double speed = evaluateMugenAssignmentAndReturnAsFloat(subShot->mSpeed, &assignmentCaller);
 		velocity = vecScale(vecNormalize(velocity), speed);
 	}
-
+	 
 	e->mPhysicsID = addToPhysicsHandler(vecAdd(caller->mPosition, offset));
 	addAccelerationToHandledPhysics(e->mPhysicsID, velocity);
-	setHandledPhysicsMaxVelocity(e->mPhysicsID, vecLength(velocity));
 
 	e->mCollider = makeColliderFromCirc(subShot->mColCirc);
 	e->mCollisionID = addColliderToCollisionHandler(caller->mRoot->mCollisionData.mCollisionList, getHandledPhysicsPositionReference(e->mPhysicsID), e->mCollider, shotHitCB, e, &caller->mRoot->mCollisionData);
@@ -444,6 +494,7 @@ static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i)
 	setShotColor(subShot, e, &assignmentCaller);
 
 	e->mHasGimmickData = 0;
+	e->mIsStillActive = 1;
 
 	caller->mRoot->mSubShotsLeft++;
 	e->mListID = int_map_push_back_owned(&caller->mRoot->mSubShots, e);
@@ -574,4 +625,98 @@ void evaluateBounceFunction(char * tDst, void * tCaller)
 	if (pos.x > 640) vel->x = -1;
 
 	strcpy(tDst, "");
+}
+
+typedef struct {
+
+	Velocity mDirection;
+	double mState;
+	int mIsActive;
+} AckermannData;
+
+static void initAckermann(ActiveSubShot* e) {
+	e->mGimmickData = allocMemory(sizeof(AckermannData));
+	e->mHasGimmickData = 1;
+
+	AckermannData* data = e->mGimmickData;
+	data->mIsActive = 0;
+}
+
+void evaluateAckermannFunction(char * tDst, void * tCaller)
+{
+	ActiveSubShot* e = tCaller;
+	if (!e->mHasGimmickData) {
+		initAckermann(e);
+	}
+
+	Velocity* vel = getHandledPhysicsVelocityReference(e->mPhysicsID);
+	AckermannData* data = e->mGimmickData;
+	if (!data->mIsActive) {
+		if (vecLength(*vel) > 0 && randfrom(0, 1) < 0.005) {
+			data->mIsActive = 1;
+			data->mState = 0;
+			data->mDirection = *vel;
+		}
+	}
+	else {
+		data->mState = min(data->mState + 1 / 60.0, 1);
+		*vel = vecRotateZ(data->mDirection, 2*M_PI*data->mState);
+		double angle = getAngleFromDirection(*vel);
+		setMugenAnimationDrawAngle(e->mAnimationID, angle);
+	}
+
+	sprintf(tDst, "");
+}
+
+void evaluateSwirlFunction(char * tDst, void * tCaller)
+{
+	ActiveSubShot* e = tCaller;
+	Velocity* vel = getHandledPhysicsVelocityReference(e->mPhysicsID);
+	*vel = vecRotateZ(*vel, 0.01);
+	double angle = getAngleFromDirection(*vel);
+	setMugenAnimationDrawAngle(e->mAnimationID, angle);
+
+	sprintf(tDst, "");
+}
+
+void evaluateBlamFunction(char * tDst, void * tCaller)
+{
+
+	ActiveSubShot* e = tCaller;
+	Velocity* vel = getHandledPhysicsVelocityReference(e->mPhysicsID);
+	
+	double l = vecLength(*vel);
+	if (l > 0) {
+		*vel = vecScale(vecNormalize(*vel), min(l*1.1, 20));
+	}
+
+	sprintf(tDst, "");
+}
+
+
+typedef struct {
+	Duration mNow;	
+} TransienceData;
+
+static void initTransience(ActiveSubShot* e) {
+	e->mGimmickData = allocMemory(sizeof(TransienceData));
+	e->mHasGimmickData = 1;
+
+	TransienceData* data = e->mGimmickData;
+	data->mNow = 0;
+}
+
+void evaluateTransienceFunction(char * tDst, void * tCaller)
+{
+	ActiveSubShot* e = tCaller;
+	if (!e->mHasGimmickData) {
+		initTransience(e);
+	}
+	TransienceData* data = e->mGimmickData;
+
+	if (handleDurationAndCheckIfOver(&data->mNow, 60)) {
+		e->mIsStillActive = 0;
+	}
+
+	sprintf(tDst, "");
 }

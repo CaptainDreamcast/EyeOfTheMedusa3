@@ -11,6 +11,7 @@
 
 #include "titlescreen.h"
 #include "player.h"
+#include "gameoverscreen.h"
 
 
 static struct {
@@ -42,7 +43,7 @@ static void loadContinueHandler(void* tData) {
 
 static void goToGameOverScreen(void* tCaller) {
 	(void)tCaller;
-	setNewScreen(&TitleScreen); // TODO
+	setNewScreen(&GameOverScreen); 
 }
 
 static void updateValue() {

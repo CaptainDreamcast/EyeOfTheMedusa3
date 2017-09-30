@@ -5,8 +5,36 @@ bgopacity = 0.3
 
 [BG Element]
 offset = 0,0
+sprite = 9000,0
+
+[BG Element]
+offset = 640,0
 sprite = 9000,1
 
 [BG Element]
+offset = 1280,0
+sprite = 9000,2
+
+[BG Element]
+offset = 1920,0
+sprite = 9000,3
+
+[BG Element]
+offset = 2560,0
+sprite = 9000,4
+
+[BG Element]
+offset = 3200,0
+sprite = 9000,5
+
+[BG Element]
+offset = 3840,0
+sprite = 9000,6
+
+[BG Element]
+offset = 4480,0
+sprite = 9000,7
+
+[BG Element]
 offset = 4690,0
-sprite = 9000,1
+sprite = 9000,0

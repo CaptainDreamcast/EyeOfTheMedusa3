@@ -258,7 +258,7 @@ Speed = 3
 shotfrequency = randfrom(0,1200)
 shottype = 104
 health = 1
-smallpower = 5
+smallpower = 1
 
 [Break]
 Time = 1000

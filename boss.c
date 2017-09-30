@@ -14,12 +14,14 @@
 #include <tari/texthandler.h>
 #include <tari/wrapper.h>
 #include <tari/screeneffect.h>
+#include <tari/input.h>
 
 #include "collision.h"
 #include "shothandler.h"
 #include "itemhandler.h"
 #include "level.h"
 #include "player.h"
+#include "storyscreen.h"
 
 typedef enum {
 	BOSS_ACTION_TYPE_GOTO,
@@ -32,7 +34,9 @@ typedef enum {
 	BOSS_ACTION_TYPE_CHANGE_ANIMATION,
 	BOSS_ACTION_TYPE_DISABLE_PLAYER_HIT,
 	BOSS_ACTION_TYPE_SET_AID_TEXT,
-
+	BOSS_ACTION_TYPE_SET_FINAL_BOSS,
+	BOSS_ACTION_TYPE_DROP_LIFE,
+	BOSS_ACTION_TYPE_DROP_BOMB,
 } BossActionType;
 
 
@@ -108,6 +112,9 @@ static struct {
 
 	int mIsDefeated;
 
+	int mIsFinalBoss;
+	int mIsInvincible;
+
 	AidTextDirection mAidTextDirection;
 } gData;
 
@@ -180,6 +187,14 @@ static void loadActionType(BossAction* e, MugenDefScriptGroup* tGroup) {
 		e->mType = BOSS_ACTION_TYPE_DROP_SMALL_POWER;
 		loadSingleValueAction(e, tGroup);
 	}
+	else if (!strcmp("lifedrop", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_DROP_LIFE;
+		loadSingleValueAction(e, tGroup);
+	}
+	else if (!strcmp("bombdrop", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_DROP_BOMB;
+		loadSingleValueAction(e, tGroup);
+	}
 	else if (!strcmp("setrotation", typeString)) {
 		e->mType = BOSS_ACTION_TYPE_SET_ROTATION;
 		loadSingleValueAction(e, tGroup);
@@ -206,6 +221,10 @@ static void loadActionType(BossAction* e, MugenDefScriptGroup* tGroup) {
 	}
 	else if (!strcmp("setaidtextrandom", typeString)) {
 		e->mType = BOSS_ACTION_TYPE_SET_AID_TEXT;
+		loadSingleValueAction(e, tGroup);
+	}
+	else if (!strcmp("setfinalboss", typeString)) {
+		e->mType = BOSS_ACTION_TYPE_SET_FINAL_BOSS;
 		loadSingleValueAction(e, tGroup);
 	}
 	else {
@@ -264,9 +283,27 @@ static void updateHealthBarSize() {
 	setAnimationSize(gData.mHealthBarAnimationID, makePosition(length, 10, 1), makePosition(0, 0, 0));
 }
 
+static void goToStoryScreen(void* tCaller) {
+	(void)tCaller;
+	if (getContinueAmount() == 5) {
+		setCurrentStoryDefinitionFile("assets/story/GOOD.def");
+	}
+	else {
+		setCurrentStoryDefinitionFile("assets/story/BAD.def");
+	}
+
+	setNewScreen(&StoryScreen);
+}
+
 static void setBossDefeated() {
+	if (gData.mIsDefeated) return;
 	gData.mIsDefeated = 1;
-	goToNextLevel();
+	if (!gData.mIsFinalBoss) {
+		goToNextLevel();
+	}
+	else {
+		addFadeOut(30, goToStoryScreen, NULL);
+	}
 }
 
 static void bossHitCB(void* tCaller, void* tCollisionData) {
@@ -274,6 +311,7 @@ static void bossHitCB(void* tCaller, void* tCollisionData) {
 	(void)tCollisionData;
 
 	if (gData.mIsDefeated) return;
+	if (gData.mIsInvincible) return;
 
 	gData.mLife--;
 	updateHealthBarSize();
@@ -306,6 +344,9 @@ void activateBoss() {
 	setAnimationColorType(gData.mHealthBarAnimationID, COLOR_DARK_RED);
 	updateHealthBarSize();
 
+	gData.mIsFinalBoss = 0;
+	gData.mIsInvincible = 0;
+
 	gData.mIsDefeated = 0;
 	gData.mIsActive = 1;
 }
@@ -332,6 +373,25 @@ void evaluateTextAidFunction(char * tDst, void * tCaller)
 {
 	(void)tCaller;
 	sprintf(tDst, "%d", gData.mAidTextDirection);
+}
+
+void addFinalBossShot(int mID)
+{
+	if (!gData.mIsFinalBoss) return;
+	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
+	addShot(mID, getEnemyCollisionList(), p);
+}
+
+void setFinalBossInvincible()
+{
+	if (!gData.mIsFinalBoss) return;
+	gData.mIsInvincible = 1;
+}
+
+void setFinalBossVulnerable()
+{
+	if (!gData.mIsFinalBoss) return;
+	gData.mIsInvincible = 0;
 }
 
 
@@ -371,6 +431,22 @@ static void performSmallPowerDrop(BossAction* tAction) {
 	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
 	int amount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mValue, NULL, 0);
 	addSmallPowerItems(p, amount);
+}
+
+static void performLifeDrop(BossAction* tAction) {
+	SingleValueAction* e = tAction->mData;
+
+	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
+	int amount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mValue, NULL, 0);
+	addLifeItems(p, amount);
+}
+
+static void performBombDrop(BossAction* tAction) {
+	SingleValueAction* e = tAction->mData;
+
+	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
+	int amount = getMugenAssignmentAsIntegerValueOrDefaultWhenEmpty(e->mValue, NULL, 0);
+	addBombItems(p, amount);
 }
 
 static void performSettingRotation(BossAction* tAction) {
@@ -417,6 +493,17 @@ static void performSettingRandomAidText() {
 	gData.mAidTextDirection = randfromInteger(AID_TEXT_DOWN, AID_TEXT_MID);
 }
 
+static void performSettingFinalBoss() {
+	gData.mIsFinalBoss = 1;
+
+
+	PhysicsObject* physics = getPhysicsFromHandler(gData.mPhysicsID);
+	PhysicsObject* playerPhysics = getPlayerPhysics();
+	*physics = *playerPhysics;
+	physics->mPosition.x = 320 + (320 - physics->mPosition.x);
+	setHandledPhysicsDragCoefficient(gData.mPhysicsID, makePosition(0.3, 0.3, 0));
+}
+
 static void performAction(BossAction* e) {
 	if (e->mType == BOSS_ACTION_TYPE_GOTO) {
 		performGoto(e);
@@ -426,6 +513,12 @@ static void performAction(BossAction* e) {
 	}
 	else if (e->mType == BOSS_ACTION_TYPE_DROP_SMALL_POWER) {
 		performSmallPowerDrop(e);
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_DROP_LIFE) {
+		performLifeDrop(e);
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_DROP_BOMB) {
+		performBombDrop(e);
 	}
 	else if (e->mType == BOSS_ACTION_TYPE_SET_ROTATION) {
 		performSettingRotation(e);
@@ -447,6 +540,9 @@ static void performAction(BossAction* e) {
 	}
 	else if (e->mType == BOSS_ACTION_TYPE_SET_AID_TEXT) {
 		performSettingRandomAidText();
+	}
+	else if (e->mType == BOSS_ACTION_TYPE_SET_FINAL_BOSS) {
+		performSettingFinalBoss();
 	}
 	else {
 		logError("Unrecognized boss action type");
@@ -487,6 +583,7 @@ static void updateActions() {
 }
 
 static void updateMovement() {
+	if (gData.mIsFinalBoss) return;
 	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
 	Vector3D delta = vecSub(gData.mTarget, p);
 	Velocity* vel = getHandledPhysicsVelocityReference(gData.mPhysicsID);
@@ -498,6 +595,28 @@ static void updateTime() {
 	gData.mTime++;
 }
 
+static void updateFinalBoss() {
+	if (!gData.mIsFinalBoss) return;
+	
+	setHandledPhysicsMaxVelocity(gData.mPhysicsID, getPlayerSpeed());
+	Position* pos = getHandledPhysicsPositionReference(gData.mPhysicsID);
+	*pos = clampPositionToGeoRectangle(*pos, makeGeoRectangle(0, 0, 640, 327));
+
+	if(hasPressedLeftSingle(0)) {
+		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(getPlayerAcceleration(), 0, 0));
+	}
+	if (hasPressedRightSingle(0)) {
+		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(-getPlayerAcceleration(), 0, 0));
+	}
+	if (hasPressedUpSingle(0)) {
+		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(0, -getPlayerAcceleration(), 0));
+	}
+	if (hasPressedDownSingle(0)) {
+		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(0, getPlayerAcceleration(), 0));
+	}
+
+}
+
 static void updateBoss(void* tData) {
 	(void)tData;
 	if (!gData.mIsActive) return;
@@ -506,7 +625,9 @@ static void updateBoss(void* tData) {
 	updateGoingToNextPattern();
 	updateActions();
 	updateMovement();
+	updateFinalBoss();
 	updateTime();
+	
 }
 
 ActorBlueprint BossHandler = {

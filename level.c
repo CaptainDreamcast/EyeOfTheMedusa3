@@ -10,11 +10,11 @@
 #include <tari/wrapper.h>
 
 #include "enemyhandler.h"
-#include "banter.h"
 #include "boss.h"
 #include "bg.h"
 #include "player.h"
 #include "gamescreen.h"
+#include "ui.h"
 
 typedef struct {
 	TextureData mTextures[10];
@@ -194,11 +194,12 @@ static void loadLevelHandler(void* tData) {
 
 	loadSpritesAndAnimations(&script);
 	loadEnemyTypesFromScript(&script, &gData.mAnimations, &gData.mSprites);
-	loadBanterFromScript(&script);
 	loadStageEnemiesFromScript(&script);
 	loadBoss(&script);
 	loadStage(&script);
 	unloadMugenDefScript(script);
+
+	loadStageDisplay(&gData.mSprites);
 
 	gData.mStagePart = 0;
 	gData.mTime = 0;
@@ -282,7 +283,7 @@ ActorBlueprint LevelHandler = {
 
 void setLevelToStart()
 {
-	gData.mCurrentLevel = 1;
+	gData.mCurrentLevel = 4;
 }
 
 void goToNextLevel()

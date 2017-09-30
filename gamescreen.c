@@ -12,7 +12,6 @@
 #include "enemyhandler.h"
 #include "level.h"
 #include "shothandler.h"
-#include "banter.h"
 #include "collision.h"
 #include "boss.h"
 #include "assignment.h"
@@ -24,8 +23,9 @@
 static void loadGameScreen() {
 	instantiateActor(getMugenAnimationHandlerActorBlueprint());
 
-	loadGameAssignments();
+	
 	loadCollisions();
+	instantiateActor(AssignmentHandler);
 	instantiateActor(ContinueHandler);
 	instantiateActor(GameOptionHandler);
 	instantiateActor(EffectHandler);
@@ -34,7 +34,6 @@ static void loadGameScreen() {
 	instantiateActor(BackgroundHandler);
 	instantiateActor(UserInterface);
 	instantiateActor(Player);
-	instantiateActor(BanterHandler);
 	instantiateActor(ShotHandler);
 	instantiateActor(BossHandler);
 

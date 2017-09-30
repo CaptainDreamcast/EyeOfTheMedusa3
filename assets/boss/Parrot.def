@@ -2,12 +2,17 @@
 
 name = "P A R R O T"
 life = 2400
-startpos = 550, 180
+startpos = 700, 180
 anim = 3000
 
 [Pattern]
 lifestart = 2400
 
+[Action]
+time = 0
+type = goto
+value = 550,180
+speed = 7
 
 [Pattern]
 lifestart = 2300

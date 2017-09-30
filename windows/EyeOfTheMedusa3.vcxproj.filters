@@ -39,9 +39,6 @@
     <ClCompile Include="..\shothandler.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\banter.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\collision.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -64,6 +61,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\gameoptionhandler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gameoverscreen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\storyscreen.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,9 +95,6 @@
     <ClInclude Include="..\shothandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\banter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -117,6 +117,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\gameoptionhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gameoverscreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\storyscreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,5 +12,10 @@ void removeEnemyShots();
 void evaluateBigBangFunction(char* tDst, void* tCaller);
 void evaluateBounceFunction(char* tDst, void* tCaller);
 void evaluateTextAidFunction(char* tDst, void* tCaller);
+void evaluateAckermannFunction(char* tDst, void* tCaller);
+void evaluateSwirlFunction(char* tDst, void* tCaller);
+void evaluateBlamFunction(char* tDst, void* tCaller);
+void evaluateTransienceFunction(char* tDst, void* tCaller);
+
 
 extern ActorBlueprint ShotHandler;

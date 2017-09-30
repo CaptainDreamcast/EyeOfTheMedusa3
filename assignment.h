@@ -1,3 +1,5 @@
 #pragma once
 
-void loadGameAssignments();
+#include <tari/actorhandler.h>
+
+extern ActorBlueprint AssignmentHandler;

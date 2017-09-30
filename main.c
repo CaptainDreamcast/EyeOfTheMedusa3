@@ -12,6 +12,7 @@
 #include "gamescreen.h"
 #include "level.h"
 #include "titlescreen.h"
+#include "storyscreen.h"
 
 #ifdef DREAMCAST
 KOS_INIT_FLAGS(INIT_DEFAULT);

@@ -11,3 +11,6 @@ void fetchBossTimeVariable(char* tDst, void* tCaller);
 int isBossActive();
 Position getBossPosition();
 void evaluateTextAidFunction(char * tDst, void * tCaller);
+void addFinalBossShot(int mID);
+void setFinalBossInvincible();
+void setFinalBossVulnerable();

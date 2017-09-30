@@ -17,6 +17,8 @@
 #include "effecthandler.h"
 #include "titlescreen.h"
 #include "continuehandler.h"
+#include "gameoverscreen.h"
+#include "boss.h"
 
 static struct {
 	MugenSpriteFile mSprites;
@@ -47,6 +49,11 @@ static struct {
 	int mIsBombing;
 	Duration mBombNow;
 	Duration mBombDuration;
+	int mIsFinalBossBombing;
+
+	int mIsDying;
+	Duration mDyingNow;
+	Duration mDyingDuration;
 
 	int mPower;
 
@@ -81,7 +88,7 @@ static void loadPlayer(void* tData) {
 	setMugenAnimationBasePosition(gData.mAnimationID, getHandledPhysicsPositionReference(gData.mPhysicsID));
 
 	gData.mCollisionData.mCollisionList = getPlayerCollisionList();
-	gData.mCollider = makeColliderFromCirc(makeCollisionCirc(makePosition(0, 0, 0), 5));
+	gData.mCollider = makeColliderFromCirc(makeCollisionCirc(makePosition(0, 0, 0), 2));
 	gData.mCollisionID = addColliderToCollisionHandler(getPlayerCollisionList(), getHandledPhysicsPositionReference(gData.mPhysicsID), gData.mCollider, playerHitCB, NULL, &gData.mCollisionData);
 
 	gData.mItemCollider = makeColliderFromCirc(makeCollisionCirc(makePosition(0, 0, 0), 40));
@@ -90,7 +97,7 @@ static void loadPlayer(void* tData) {
 	gData.mHitboxTexture = loadTexture("assets/debug/collision_circ.pkg");
 	gData.mHitBoxAnimationID = playOneFrameAnimationLoop(makePosition(-8, -8, 35), &gData.mHitboxTexture);
 	setAnimationBasePositionReference(gData.mHitBoxAnimationID, getHandledPhysicsPositionReference(gData.mPhysicsID));
-	setAnimationSize(gData.mHitBoxAnimationID, makePosition(10, 10, 0), makePosition(8, 8, 0));
+	setAnimationSize(gData.mHitBoxAnimationID, makePosition(4, 4, 0), makePosition(8, 8, 0));
 	setAnimationTransparency(gData.mHitBoxAnimationID, 0);
 	
 	gData.mAcceleration = 2;
@@ -114,6 +121,9 @@ static void loadPlayer(void* tData) {
 	gData.mIsHit = 0;
 	gData.mIsHitDuration = 120;
 
+	gData.mIsDying = 0;
+	gData.mDyingDuration = 5;
+
 	gData.mCanBeHitByEnemies = 1;
 }
 
@@ -121,16 +131,16 @@ static void updateMovement() {
 	Position* pos = getHandledPhysicsPositionReference(gData.mPhysicsID);
 	*pos = clampPositionToGeoRectangle(*pos, makeGeoRectangle(0, 0, 640, 327));
 	
-	if (hasPressedLeft()) {
+	if (hasPressedLeftSingle(0) || hasPressedLeftSingle(1)) {
 		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(-gData.mAcceleration, 0, 0));
 	}
-	if (hasPressedRight()) {
+	if (hasPressedRightSingle(0)|| hasPressedRightSingle(1)) {
 		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(gData.mAcceleration, 0, 0));
 	}
-	if (hasPressedUp()) {
+	if (hasPressedUpSingle(0) || hasPressedUpSingle(1)) {
 		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(0, -gData.mAcceleration, 0));
 	}
-	if (hasPressedDown()) {
+	if (hasPressedDownSingle(0) || hasPressedDownSingle(1)) {
 		addAccelerationToHandledPhysics(gData.mPhysicsID, makePosition(0, gData.mAcceleration, 0));
 	}
 }
@@ -155,6 +165,10 @@ static void firePlayerShot() {
 	int shotID = gData.mIsFocused * 10 + powerBase;
 	addShot(shotID, getPlayerShotCollisionList(), p);
 
+	if (hasPressedASingle(0)) {
+		addFinalBossShot(shotID + 30);
+	}
+
 	gData.mCooldownNow = 0;
 	gData.mIsInCooldown = 1;
 }
@@ -167,7 +181,7 @@ static void updateShot() {
 		return;
 	}
 
-	if (hasPressedA()) {
+	if (hasPressedASingle(0) || hasPressedASingle(1)) {
 		firePlayerShot();
 	}
 }
@@ -177,20 +191,34 @@ static void updateBomb() {
 		removeEnemyShots();
 		Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
 		addShot(20, getPlayerShotCollisionList(), p);
+		if (gData.mIsFinalBossBombing) {
+			addFinalBossShot(50);
+		}
+
 		if (handleDurationAndCheckIfOver(&gData.mBombNow, gData.mBombDuration)) {
 			gData.mIsBombing = 0;
+			if (gData.mIsFinalBossBombing) {
+				setFinalBossVulnerable();
+			}
 		}
 		return;
 	}
 	
 	if (!gData.mBombAmount) return;
 
-	if (hasPressedBFlank()) {
+	int isSecondPort = hasPressedBFlankSingle(1);
+	if (hasPressedBFlankSingle(0) || isSecondPort) {
 		gData.mLocalBombCount++;
 		gData.mBombAmount--;
 		setBombText(gData.mBombAmount);
 		gData.mIsBombing = 1;
 		gData.mBombNow = 0;
+		gData.mIsDying = 0;
+
+		gData.mIsFinalBossBombing = !isSecondPort;
+		if (gData.mIsFinalBossBombing) {
+			setFinalBossInvincible();
+		}
 	}
 
 }
@@ -201,6 +229,16 @@ static void updateBeingHit() {
 	if (handleDurationAndCheckIfOver(&gData.mIsHitNow, gData.mIsHitDuration)) {
 		gData.mIsHit = 0;
 		setMugenAnimationTransparency(gData.mAnimationID, 1);
+	}
+}
+
+static void setDead();
+
+static void updateDying() {
+	if (!gData.mIsDying) return;
+
+	if (handleDurationAndCheckIfOver(&gData.mDyingNow, gData.mDyingDuration)) {
+		setDead();
 	}
 }
 
@@ -218,8 +256,9 @@ static void updatePlayer(void* tData) {
 	updateShot();
 	updateBomb();
 	updateBeingHit();
+	updateDying();
 
-	if (hasPressedX()) { // TODO: remove
+	if (hasPressedX()) {
 		handleSmallPowerItemCollection();
 	}
 }
@@ -265,23 +304,12 @@ static void setHit() {
 }
 
 static void goToGameOverScreen(void* tCaller) {
-	setNewScreen(&TitleScreen); // TODO
+	setNewScreen(&GameOverScreen); 
 }
 
-static void playerHitCB(void* tCaller, void* tCollisionData) {
-	(void)tCaller;
-	CollisionData* collisionData = tCollisionData;
-
-	if (collisionData->mIsItem) {
-		handleItemCollection(collisionData);
-		return;
-	}
-
-	if (gData.mIsHit || gData.mIsBombing) return;
-	if (!gData.mCanBeHitByEnemies && collisionData->mCollisionList == getEnemyCollisionList()) return;
-
+static void setDead() {
 	gData.mLocalDeathCount++;
-	
+
 	gData.mPower = max(0, gData.mPower - 100);
 	setPowerText(gData.mPower);
 
@@ -302,6 +330,24 @@ static void playerHitCB(void* tCaller, void* tCollisionData) {
 	}
 
 	setHit();
+	gData.mIsDying = 0;
+}
+
+static void playerHitCB(void* tCaller, void* tCollisionData) {
+	(void)tCaller;
+	CollisionData* collisionData = tCollisionData;
+
+	if (collisionData->mIsItem) {
+		handleItemCollection(collisionData);
+		return;
+	}
+
+	if (gData.mIsHit || gData.mIsBombing) return;
+	if (!gData.mCanBeHitByEnemies && collisionData->mCollisionList == getEnemyCollisionList()) return;
+	if (gData.mIsDying) return;
+
+	gData.mIsDying = 1;
+	gData.mDyingNow = 0;
 }
 
 Position getPlayerPosition()
@@ -309,9 +355,24 @@ Position getPlayerPosition()
 	return *getHandledPhysicsPositionReference(gData.mPhysicsID);
 }
 
+PhysicsObject * getPlayerPhysics()
+{
+	return getPhysicsFromHandler(gData.mPhysicsID);
+}
+
+double getPlayerAcceleration()
+{
+	return gData.mAcceleration;
+}
+
+double getPlayerSpeed()
+{
+	return gData.mIsFocused ? gData.mFocusSpeed : gData.mNormalSpeed;
+}
+
 void resetPlayerState()
 {
-	gData.mPower = 200;
+	gData.mPower = 0;
 	gData.mLifeAmount = 2; 
 	gData.mBombAmount = 99;
 	gData.mContinueAmount = 5;
@@ -351,7 +412,7 @@ int getContinueAmount()
 void reduceContinueAmount()
 {
 	gData.mLifeAmount = 2;
-	gData.mBombAmount = 99;
+	gData.mBombAmount = 3;
 	gData.mContinueAmount--;
 }
 

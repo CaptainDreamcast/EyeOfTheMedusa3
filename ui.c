@@ -10,6 +10,9 @@ static struct {
 	MugenAnimation* mAnimation;
 	int mAnimationID;
 
+	MugenAnimation* mStageDisplayAnimation;
+	int mStageDisplayAnimationID;
+
 	int mPowerTextID;
 	int mLifeAmountTextID;
 	int mBombAmountTextID;
@@ -31,6 +34,12 @@ static void loadUserInterface(void* tData) {
 ActorBlueprint UserInterface = {
 	.mLoad = loadUserInterface,
 };
+
+void loadStageDisplay(MugenSpriteFile * tSprites)
+{
+	gData.mStageDisplayAnimation = createOneFrameMugenAnimationForSprite(9500, 0);
+	gData.mStageDisplayAnimationID = addMugenAnimation(gData.mStageDisplayAnimation, tSprites, makePosition(15, 327+29, 45));
+}
 
 void setPowerText(int tPower)
 {
