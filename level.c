@@ -283,7 +283,7 @@ ActorBlueprint LevelHandler = {
 
 void setLevelToStart()
 {
-	gData.mCurrentLevel = 1;
+	gData.mCurrentLevel = 2;
 }
 
 void goToNextLevel()

@@ -68,9 +68,3 @@ int main(int argc, char** argv) {
 }
 
 
-// TODO: find out why main doesn't work
-int wmain(int argc, char** argv) {
-	return main(argc, argv);
-}
-
-

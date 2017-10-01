@@ -103,8 +103,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;winmm.lib;version.lib;imm32.lib;libjpeg.lib;libpng16.lib;zlib.lib;libwebp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <IgnoreAllDefaultLibraries>
