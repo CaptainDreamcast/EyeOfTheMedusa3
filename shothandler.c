@@ -665,7 +665,7 @@ void evaluateAckermannFunction(char * tDst, void * tCaller)
 		setMugenAnimationDrawAngle(e->mAnimationID, angle);
 	}
 
-	sprintf(tDst, "");
+	strcpy(tDst, "");
 }
 
 void evaluateSwirlFunction(char * tDst, void * tCaller)
@@ -676,7 +676,7 @@ void evaluateSwirlFunction(char * tDst, void * tCaller)
 	double angle = getAngleFromDirection(*vel);
 	setMugenAnimationDrawAngle(e->mAnimationID, angle);
 
-	sprintf(tDst, "");
+	strcpy(tDst, "");
 }
 
 void evaluateBlamFunction(char * tDst, void * tCaller)
@@ -690,7 +690,7 @@ void evaluateBlamFunction(char * tDst, void * tCaller)
 		*vel = vecScale(vecNormalize(*vel), min(l*1.1, 20));
 	}
 
-	sprintf(tDst, "");
+	strcpy(tDst, "");
 }
 
 
@@ -718,5 +718,5 @@ void evaluateTransienceFunction(char * tDst, void * tCaller)
 		e->mIsStillActive = 0;
 	}
 
-	sprintf(tDst, "");
+	strcpy(tDst, "");
 }
