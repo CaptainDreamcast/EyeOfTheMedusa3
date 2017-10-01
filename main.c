@@ -20,8 +20,6 @@ KOS_INIT_FLAGS(INIT_DEFAULT);
 extern uint8 romdisk[];
 KOS_INIT_ROMDISK(romdisk);
 
-#define DEVELOP
-
 #endif
 
 
@@ -39,7 +37,7 @@ void setMainFileSystem() {
 #ifdef DEVELOP
 	setFileSystem("/pc");
 #else
-	setFileSystem("/rd");
+	setFileSystem("/cd");
 #endif
 }
 

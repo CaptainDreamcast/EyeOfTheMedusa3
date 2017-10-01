@@ -247,22 +247,6 @@ smallpower = 5
 [Break]
 Time = 100
 
-[Enemy]
-amount = 402
-Time = 100
-id = 3 
-Position = 700+(curenemy/6)*100,50+50*(curenemy%6)
-FinalPosition = -100,50+50*(curenemy%6)
-MovementType = rush
-Speed = 3
-shotfrequency = randfrom(0,1200)
-shottype = 104
-health = 1
-smallpower = 1
-
-[Break]
-Time = 1000
-
 [Boss]
 Time = 200
 

@@ -19,6 +19,7 @@
 #include "effecthandler.h"
 #include "continuehandler.h"
 #include "gameoptionhandler.h"
+#include "titlescreen.h"
 
 static void loadGameScreen() {
 	instantiateActor(getMugenAnimationHandlerActorBlueprint());
@@ -46,7 +47,7 @@ static void updateGameScreen() {
 
 
 	if (hasPressedAbortFlank()) {
-		abortScreenHandling();
+		setNewScreen(&TitleScreen);
 	}
 }
 

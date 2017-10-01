@@ -183,7 +183,7 @@ static void updateText() {
 	if (gData.mIsStoryOver) return;
 	if (gData.mTextID == -1) return;
 
-	if (hasPressedAFlank() || hasPressedStart()) {
+	if (hasPressedAFlankSingle(0) || hasPressedAFlankSingle(1) || hasPressedStartSingle(0) || hasPressedStartSingle(1)) {
 		if (isHandledTextBuiltUp(gData.mTextID)) {
 			loadNextStoryGroup();
 		}

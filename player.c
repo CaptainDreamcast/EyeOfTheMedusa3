@@ -77,6 +77,7 @@ static void loadPlayer(void* tData) {
 	(void)tData;
 	setLifeText(gData.mLifeAmount);
 	setBombText(gData.mBombAmount);
+	setPowerText(gData.mPower);
 
 	gData.mSprites = loadMugenSpriteFileWithoutPalette("assets/player/PLAYER.sff");
 	gData.mAnimations = loadMugenAnimationFile("assets/player/PLAYER.air");
@@ -146,7 +147,7 @@ static void updateMovement() {
 }
 
 static void updateFocus() {
-	if (hasPressedR()) {
+	if (hasPressedRSingle(0) || hasPressedRSingle(1)) {
 		setHandledPhysicsMaxVelocity(gData.mPhysicsID, gData.mFocusSpeed);
 		setAnimationTransparency(gData.mHitBoxAnimationID, 1);
 		gData.mIsFocused = 1;
@@ -257,10 +258,6 @@ static void updatePlayer(void* tData) {
 	updateBomb();
 	updateBeingHit();
 	updateDying();
-
-	if (hasPressedX()) {
-		handleSmallPowerItemCollection();
-	}
 }
 
 ActorBlueprint Player = {
@@ -374,7 +371,7 @@ void resetPlayerState()
 {
 	gData.mPower = 0;
 	gData.mLifeAmount = 2; 
-	gData.mBombAmount = 99;
+	gData.mBombAmount = 3;
 	gData.mContinueAmount = 5;
 }
 
