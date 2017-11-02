@@ -189,7 +189,13 @@ static void loadLevelHandler(void* tData) {
 	gData.mStageActions = new_list();
 
 	char path[1024];
+
+// TODO: more elegant
+#ifdef DREAMCAST
+    sprintf(path, "assets/stage/dc/%d.def", gData.mCurrentLevel);
+#else
 	sprintf(path, "assets/stage/%d.def", gData.mCurrentLevel);
+#endif
 	MugenDefScript script = loadMugenDefScript(path);
 
 	loadSpritesAndAnimations(&script);

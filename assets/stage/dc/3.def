@@ -1,0 +1,65 @@
+[Header]
+Sprites = "assets/stage/3.sff"
+Animations = "assets/stage/3.air"
+Boss = "assets/boss/Parrot.def"
+Banter = "assets/stage/banter3.def"
+BG = "assets/stage/bg3.def"
+
+[EnemyType]
+id = 3
+anim = 2
+deathanim = 3
+
+[Enemy]
+amount = 3
+Time = 100
+id = 3 
+Position = 700,70+curenemy*100
+WaitPosition = 600,70+curenemy*100
+FinalPosition = 700,70+curenemy*100
+WaitDuration = 1500
+MovementType = wait
+Speed = 4
+shotfrequency = randfrom(10,20)
+shottype = 301
+health = 20
+smallpower = 5
+
+[Enemy]
+amount = 3
+Time = 100
+id = 3 
+Position = 700,70+curenemy*100
+WaitPosition = 500,70+curenemy*100
+FinalPosition = 700,70+curenemy*100
+WaitDuration = 1500
+MovementType = wait
+Speed = 4
+shotfrequency = randfrom(30,40)
+shottype = 301
+health = 20
+smallpower = 5
+
+[Enemy]
+amount = 3
+Time = 100
+id = 3 
+Position = 700,70+curenemy*100
+WaitPosition = 400,70+curenemy*100
+FinalPosition = 700,70+curenemy*100
+WaitDuration = 1500
+MovementType = wait
+Speed = 4
+shotfrequency = randfrom(50,60)
+shottype = 301
+health = 20
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Boss]
+Time = 200
+
+[Break] ; TODO: remove
+Time = 100000

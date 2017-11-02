@@ -1,0 +1,313 @@
+[Header]
+Sprites = "assets/stage/2.sff"
+Animations = "assets/stage/2.air"
+Boss = "assets/boss/God.def"
+Banter = "assets/stage/banter2.def"
+BG = "assets/stage/bg2.def"
+
+[EnemyType]
+id = 3
+anim = 2
+deathanim = 3
+
+[Enemy]
+amount = 20
+Time = 100
+id = 3 
+Position = 700+curenemy*100,50
+FinalPosition = -100,50
+MovementType = rush
+Speed = 3
+shotfrequency = randfrom(40, 60)
+shottype = 200
+health = 1
+smallpower = 5
+
+[Enemy]
+amount = 20
+Time = 100
+id = 3 
+Position = 700+curenemy*100,300
+FinalPosition = -100,300
+MovementType = rush
+Speed = 3
+shotfrequency = randfrom(40, 60)
+shottype = 200
+health = 1
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Enemy]
+amount = 6
+Time = 100
+id = 3 
+Position = 700,50+curenemy*50
+WaitPosition = 500,50+curenemy*50
+FinalPosition = 700,50+curenemy*50
+WaitDuration = 800
+MovementType = wait
+Speed = 5
+shotfrequency = 20
+shottype = 201
+health = 15
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Enemy]
+amount = 2
+Time = 100
+id = 3 
+Position = 700,50+curenemy*50*5
+WaitPosition = 500,50+curenemy*50*5
+FinalPosition = 700,50+curenemy*50*5
+WaitDuration = 1000
+MovementType = wait
+Speed = 5
+shotfrequency = 30
+shottype = 202
+health = 10
+smallpower = 5
+
+[Enemy]
+amount = 4
+Time = 100
+id = 3 
+Position = 700,100+curenemy*50
+WaitPosition = 500,100+curenemy*50
+FinalPosition = 700,100+curenemy*50
+WaitDuration = 1000
+MovementType = wait
+Speed = 5
+shotfrequency = 40
+shottype = 200
+health = 10
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Enemy]
+amount = 80
+Time = 100
+id = 3 
+Position = 700+(curenemy%40)*100,50+(250*(curenemy/40))
+FinalPosition = -100,50+(250*(curenemy/40))
+MovementType = rush
+Speed = 3
+shotfrequency = randfrom(40, 60)
+shottype = 202
+health = 5
+smallpower = 5
+
+[Break]
+Time = 100
+
+[ResetLocalCounts]
+Time = 0
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 700,180
+WaitPosition = 500,180
+FinalPosition = 700,180
+MovementType = wait
+WaitDuration = 1500
+Speed = 3
+shotfrequency = 3
+shottype = 250
+health = 120
+lifedrop = ifelse(localdeathcount=0 && localbombcount=0, 2, 1)
+bombdrop = ifelse(localdeathcount!=0 && localbombcount=0, 1, 0)
+smallpower = ifelse(localbombcount != 0, 100, 0)
+
+[Break]
+Time = 100
+
+[Enemy]
+amount = 20
+Time = 100
+id = 3 
+Position = 700+(curenemy%10)*100,50+(250*(curenemy/10))
+WaitPosition = 320,50+(250*(curenemy/10))
+FinalPosition = -100,300-(250*(curenemy/10))
+WaitDuration = 0
+MovementType = wait
+Speed = 3
+shotfrequency = 90
+shottype = ifelse(curenemy/10,200,202)
+health = 5
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Enemy]
+amount = 2
+Time = 100
+id = 3 
+Position = 700,50+curenemy*50*5
+WaitPosition = 500,50+curenemy*50*5
+FinalPosition = 700,50+curenemy*50*5
+WaitDuration = 1000
+MovementType = wait
+Speed = 5
+shotfrequency = 30
+shottype = 202
+health = 10
+smallpower = 5
+
+[Enemy]
+amount = 4
+Time = 100
+id = 3 
+Position = 700,100+curenemy*50
+WaitPosition = 450,100+curenemy*50
+FinalPosition = 700,100+curenemy*50
+WaitDuration = 1000
+MovementType = wait
+Speed = 5
+shotfrequency = 7
+shottype = 203
+health = 10
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Enemy]
+amount = 6
+Time = 100
+id = 3 
+Position = 700,50+curenemy*50
+WaitPosition = 500,50+curenemy*50
+FinalPosition = 700,50+curenemy*50
+WaitDuration = 1200
+MovementType = wait
+Speed = 5
+shotfrequency = 10
+shottype = 204
+health = 15
+smallpower = 5
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 700,180
+WaitPosition = 450,180
+FinalPosition = -100,180
+WaitDuration = 1000
+MovementType = wait
+Speed = 5
+shotfrequency = 5
+shottype = 204
+health = 30
+smallpower = 20
+bombdrop = 1
+
+[Break]
+Time = 100
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 700,180
+WaitPosition = 550,180
+FinalPosition = -100,180
+WaitDuration = 1500
+MovementType = wait
+Speed = 5
+shotfrequency = 40
+shottype = 202
+health = 40
+smallpower = 20
+lifedrop = 1
+
+[Enemy]
+amount = 70
+Time = 100
+id = 3 
+Position = randfrom(700, 1300),randfrom(0, 327)
+FinalPosition = -100,randfrom(0, 327)
+MovementType = rush
+Speed = 3
+shotfrequency = 60
+shottype = 201
+health = 5
+smallpower = 5
+
+[Break]
+Time = 100
+
+[Boss]
+Time = 200
+
+[Break] ; TODO: remove
+Time = 100000
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 700,50
+WaitPosition 400,50
+FinalPosition = 400,50
+WaitDuration = 1000000
+MovementType = wait
+Speed = 3
+shotfrequency = randfrom(20, 40)
+shottype = 204
+health = 200
+smallpower = 100
+bombdrop = 1
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 800,50
+WaitPosition 500,50
+FinalPosition = 500,50
+WaitDuration = 1000000
+MovementType = wait
+Speed = 3
+shotfrequency = randfrom(40, 60)
+shottype = 202
+health = 200
+smallpower = 100
+lifedrop = 1
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 800,300
+WaitPosition 500,300
+FinalPosition = 500,300
+WaitDuration = 1000000
+MovementType = wait
+Speed = 3
+shotfrequency = randfrom(40, 60)
+shottype = 202
+health = 200
+smallpower = 100
+bombdrop = 1
+
+[Enemy]
+Time = 100
+id = 3 
+Position = 700,300
+WaitPosition 400,300
+FinalPosition = 400,300
+WaitDuration = 1000000
+MovementType = wait
+Speed = 3
+shotfrequency = randfrom(20, 40)
+shottype = 204
+health = 200
+smallpower = 100
+bombdrop = 1
+
+[Break] ; TODO: remove
+Time = 100000

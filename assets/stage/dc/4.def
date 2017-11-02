@@ -1,0 +1,12 @@
+[Header]
+Sprites = "assets/stage/4.sff"
+Animations = "assets/stage/4.air"
+Boss = "assets/boss/DarkFalz.def"
+Banter = "assets/stage/banter4.def"
+BG = "assets/stage/bg4.def"
+
+[Boss]
+Time = 200
+
+[Break] ; TODO: remove
+Time = 100000

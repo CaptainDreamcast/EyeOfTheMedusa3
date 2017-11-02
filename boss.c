@@ -315,7 +315,7 @@ static void bossHitCB(void* tCaller, void* tCollisionData) {
 	if (gData.mIsDefeated) return;
 	if (gData.mIsInvincible) return;
 
-	gData.mLife-=100;
+	gData.mLife--;
 	updateHealthBarSize();
 
 	if (gData.mLife <= 0) {
