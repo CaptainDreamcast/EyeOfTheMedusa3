@@ -17,5 +17,6 @@ void evaluateSwirlFunction(char* tDst, void* tCaller);
 void evaluateBlamFunction(char* tDst, void* tCaller);
 void evaluateTransienceFunction(char* tDst, void* tCaller);
 
+int getFinalBossShotsDeflected();
 
 extern ActorBlueprint ShotHandler;

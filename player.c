@@ -83,7 +83,7 @@ static void loadPlayer(void* tData) {
 	gData.mAnimations = loadMugenAnimationFile("assets/player/PLAYER.air");
 
 	gData.mPhysicsID = addToPhysicsHandler(makePosition(40, 200, 0));
-	setHandledPhysicsDragCoefficient(gData.mPhysicsID, makePosition(0.3, 0.3, 0));
+	setHandledPhysicsDragCoefficient(gData.mPhysicsID, makePosition(1, 1, 0));
 
 	gData.mAnimationID = addMugenAnimation(getMugenAnimation(&gData.mAnimations, 1), &gData.mSprites, makePosition(0, 0, 10));
 	setMugenAnimationBasePosition(gData.mAnimationID, getHandledPhysicsPositionReference(gData.mPhysicsID));
@@ -101,7 +101,7 @@ static void loadPlayer(void* tData) {
 	setAnimationSize(gData.mHitBoxAnimationID, makePosition(4, 4, 0), makePosition(8, 8, 0));
 	setAnimationTransparency(gData.mHitBoxAnimationID, 0);
 	
-	gData.mAcceleration = 2;
+	gData.mAcceleration = 10;
 	gData.mNormalSpeed = 4;
 	gData.mFocusSpeed = 1;
 	setHandledPhysicsMaxVelocity(gData.mPhysicsID, gData.mNormalSpeed);

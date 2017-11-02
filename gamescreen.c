@@ -20,6 +20,7 @@
 #include "continuehandler.h"
 #include "gameoptionhandler.h"
 #include "titlescreen.h"
+#include "finalbossscene.h"
 
 static void loadGameScreen() {
 	instantiateActor(getMugenAnimationHandlerActorBlueprint());
@@ -37,6 +38,7 @@ static void loadGameScreen() {
 	instantiateActor(Player);
 	instantiateActor(ShotHandler);
 	instantiateActor(BossHandler);
+	instantiateActor(FinalBossSceneHandler);
 
 	instantiateActor(LevelHandler);
 

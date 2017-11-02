@@ -124,6 +124,8 @@ static void loadBossHandler(void* tData) {
 	gData.mIsLoaded = 0;
 
 	gData.mHealthBarTexture = loadTexture("$/rd/effects/white.pkg");
+
+	gData.mIsFinalBoss = 0;
 }
 
 static int isHeader(MugenDefScriptGroup* tGroup) {
@@ -313,7 +315,7 @@ static void bossHitCB(void* tCaller, void* tCollisionData) {
 	if (gData.mIsDefeated) return;
 	if (gData.mIsInvincible) return;
 
-	gData.mLife--;
+	gData.mLife-=100;
 	updateHealthBarSize();
 
 	if (gData.mLife <= 0) {
@@ -378,6 +380,7 @@ void evaluateTextAidFunction(char * tDst, void * tCaller)
 void addFinalBossShot(int mID)
 {
 	if (!gData.mIsFinalBoss) return;
+
 	Position p = *getHandledPhysicsPositionReference(gData.mPhysicsID);
 	addShot(mID, getEnemyCollisionList(), p);
 }
@@ -501,7 +504,7 @@ static void performSettingFinalBoss() {
 	PhysicsObject* playerPhysics = getPlayerPhysics();
 	*physics = *playerPhysics;
 	physics->mPosition.x = 320 + (320 - physics->mPosition.x);
-	setHandledPhysicsDragCoefficient(gData.mPhysicsID, makePosition(0.3, 0.3, 0));
+	setHandledPhysicsDragCoefficient(gData.mPhysicsID, makePosition(1, 1, 0));
 }
 
 static void performAction(BossAction* e) {

@@ -98,6 +98,8 @@ static struct {
 	IntMap mShotTypes;
 
 	IntMap mActiveShots;
+
+	int mFinalBossShotsDeflected;
 } gData;
 
 static ShotType* gActiveShotType;
@@ -193,6 +195,8 @@ static void loadShotHandler(void* tData) {
 	MugenDefScript script = loadMugenDefScript("assets/shots/SHOTS.def");
 	loadShotTypesFromScript(&script);
 	unloadMugenDefScript(script);
+
+	gData.mFinalBossShotsDeflected = 0;
 }
 
 static void unloadSubShot(ActiveSubShot* e) {
@@ -323,11 +327,19 @@ ActorBlueprint ShotHandler = {
 	.mUpdate = updateShotHandler,
 };
 
+
+
 static void shotHitCB(void* tCaller, void* tCollisionData) {
 	(void)tCollisionData;
 	ActiveSubShot* e = tCaller;
 	unloadSubShot(e); 
 	int_map_remove(&e->mRoot->mSubShots, e->mListID);
+}
+
+static void finalBossShotHitCB(void* tCaller, void* tCollisionData) {
+	gData.mFinalBossShotsDeflected++;
+	
+	shotHitCB(tCaller, tCollisionData);
 }
 
 static Position getRandomEnemyOrBossPosition() {
@@ -480,7 +492,12 @@ static void addSingleSubShot(SubShotCaller* caller, SubShotType* subShot, int i)
 	addAccelerationToHandledPhysics(e->mPhysicsID, velocity);
 
 	e->mCollider = makeColliderFromCirc(subShot->mColCirc);
-	e->mCollisionID = addColliderToCollisionHandler(caller->mRoot->mCollisionData.mCollisionList, getHandledPhysicsPositionReference(e->mPhysicsID), e->mCollider, shotHitCB, e, &caller->mRoot->mCollisionData);
+
+	void(*hitCB)(void*, void*);
+	if (caller->mRoot->mCollisionData.mCollisionList == getEnemyCollisionList()) hitCB = finalBossShotHitCB;
+	else hitCB = shotHitCB;
+
+	e->mCollisionID = addColliderToCollisionHandler(caller->mRoot->mCollisionData.mCollisionList, getHandledPhysicsPositionReference(e->mPhysicsID), e->mCollider, hitCB, e, &caller->mRoot->mCollisionData);
 
 	double z;
 	if(caller->mRoot->mCollisionData.mCollisionList == getEnemyShotCollisionList()) z = 30;
@@ -719,4 +736,9 @@ void evaluateTransienceFunction(char * tDst, void * tCaller)
 	}
 
 	strcpy(tDst, "");
+}
+
+int getFinalBossShotsDeflected()
+{
+	return gData.mFinalBossShotsDeflected;
 }

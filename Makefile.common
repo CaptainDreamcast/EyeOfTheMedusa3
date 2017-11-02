@@ -2,4 +2,4 @@ OBJS = main.o \
 assignment.o bg.o boss.o collision.o enemyhandler.o \
 gamescreen.o itemhandler.o level.o player.o shothandler.o ui.o \
 effecthandler.o titlescreen.o continuehandler.o gameoptionhandler.o \
-gameoverscreen.o storyscreen.o
+gameoverscreen.o storyscreen.o finalbossscene.o
